@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import Head from 'next/head'
-import Link from 'next/link'
 
 export default function Merci() {
   useEffect(() => {
@@ -146,9 +145,9 @@ export default function Merci() {
             </div>
           </div>
 
-          <Link href="/" className="inline-block text-primary-500 hover:text-primary-600 font-medium">
+          <a href="/" className="inline-block text-primary-500 hover:text-primary-600 font-medium">
             ← Retour à l'accueil
-          </Link>
+          </a>
         </div>
       </div>
     </>
