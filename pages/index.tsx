@@ -20,7 +20,7 @@ export default function Home() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('https://formspree.io/f/xeojwpbd', {
+      const response = await fetch('https://formspree.io/f/mvgboddq', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
