@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Modal from '../components/Modal'
 import ContactForm from '../components/ContactForm'
+import { Analytics } from '@vercel/analytics/next'
 
 export default function Home() {
   const [isVisible, setIsVisible] = useState({})
