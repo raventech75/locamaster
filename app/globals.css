@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Fond LOCAMASTER global ===== */
+.site-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 800px at 12% -10%, rgba(255,185,0,0.14), transparent 60%),
+    radial-gradient(1000px 700px at 92% 12%, rgba(168,85,247,0.16), transparent 60%),
+    radial-gradient(900px 600px at 80% 100%, rgba(99,102,241,0.12), transparent 60%),
+    linear-gradient(180deg, #0b0b0b 0%, #0b0b0b 100%);
+}
+.site-bg::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 3px 3px;
+  opacity: .25;
+  mix-blend-mode: soft-light;
+}
+
+/* Animation respiration lente */
+@keyframes site-breath { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.03)} }
+.site-bg-breath { animation: site-breath 30s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce){ .site-bg-breath{ animation: none !important; } }
+
+/* Hero pan */
+@keyframes hero-pan { 0%{transform:scale(1.06) translate3d(0,0,0)} 50%{transform:scale(1.06) translate3d(10px,-8px,0)} 100%{transform:scale(1.06) translate3d(0,0,0)} }
+.animate-hero-pan { animation: hero-pan 60s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce){ .animate-hero-pan{ animation: none !important; } }
+
+/* Dégradé lent autour du CTA */
+@keyframes gradient-slow {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+.animate-gradient-slow {
+  background-size: 200% 200%;
+  animation: gradient-slow 12s ease infinite;
+}
+
+/* Reflet/shimmer très discret sur le CTA */
+@keyframes shine {
+  0%   { transform: translateX(-120%); opacity: 0 }
+  8%   { opacity: .35 }
+  20%  { transform: translateX(120%); opacity: 0 }
+  100% { opacity: 0 }
+}
+.shine {
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.3) 30%, transparent 60%);
+  animation: shine 4.5s ease-in-out infinite;
+  background-repeat: no-repeat;
+}
+
+/* Respecte prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-gradient-slow, .shine { animation: none !important; }
+}
+
+/* === Cadre dégradé discret autour du panneau === */
+.aurora-border {
+  background: linear-gradient(90deg, rgba(251,191,36,0.25), rgba(236,72,153,0.25), rgba(99,102,241,0.25));
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  padding: 1px;
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: gradient-slow 12s ease infinite;
+  background-size: 200% 200%;
+}
+
+/* === CTA premium === */
+.cta-aurora {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .75rem;
+  border-radius: 1rem;                  /* 16px */
+  text-decoration: none;
+  font-weight: 600;
+}
+.cta-aurora__ring {
+  position: absolute; inset: 0; border-radius: 1rem;
+  padding: 2px;
+  background: linear-gradient(90deg, #f59e0b, #ec4899, #6366f1);
+  background-size: 200% 200%;
+  animation: gradient-slow 12s ease infinite;
+}
+.cta-aurora__glow {
+  position: absolute; inset: -18px; border-radius: 1.75rem;
+  background: linear-gradient(90deg, rgba(245,158,11,.12), rgba(236,72,153,.12), rgba(99,102,241,.12));
+  filter: blur(18px);
+}
+.cta-aurora__body {
+  display: inline-flex;
+  align-items: center;
+  border-radius: .875rem;               /* 14px */
+  background: #050505;
+  color: #fff;
+  padding: 0.95rem 1.5rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+}
+
+/* Dégradé lent (bord + ring bouton) */
+@keyframes gradient-slow {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+
+/* Reflet très discret */
+@keyframes shine {
+  0% { transform: translateX(-120%); opacity: 0 }
+  8% { opacity: .32 }
+  20% { transform: translateX(120%); opacity: 0 }
+  100% { opacity: 0 }
+}
+.shine {
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.35) 30%, transparent 60%);
+  animation: shine 4.8s ease-in-out infinite;
+}
+
+/* Chip de réassurance */
+.chip {
+  color: rgba(255,255,255,.92);
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  padding: .35rem .65rem;
+  border-radius: 9999px;
+  font-size: .825rem;
+  backdrop-filter: blur(6px);
+}
+
+/* Respecte reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-border,
+  .cta-aurora__ring,
+  .shine { animation: none !important; }
+}

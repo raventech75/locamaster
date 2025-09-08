@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  name           String?
+  passwordHash   String
+  role           Role            @default(ESTABLISHMENT)
+  establishments Establishment[]
+  orders         Order[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+enum Role {
+  ADMIN
+  ESTABLISHMENT
+}
+
+model Establishment {
+  id              String       @id @default(cuid())
+  name            String
+  code            String       @unique
+  user            User         @relation(fields: [userId], references: [id])
+  userId          String
+  commissionRate  Float        @default(0.25)
+  stripeAccountId String? // Stripe Connect (optionnel)
+  commissions     Commission[]
+  galleries       Gallery[]
+  createdAt       DateTime     @default(now())
+}
+
+model Commission {
+  id              String        @id @default(cuid())
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+  establishmentId String
+
+  // 1-1 avec Order (relation nommée)
+  order   Order  @relation("OrderCommission", fields: [orderId], references: [id])
+  orderId String @unique
+
+  rate           Float
+  amountGross    Int
+  amountDueToEst Int
+  transferred    Boolean  @default(false)
+  createdAt      DateTime @default(now())
+}
+
+model Gallery {
+  id              String        @id @default(cuid())
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+  establishmentId String
+  title           String
+  accessCode      String        @unique
+  photos          Photo[]
+  albums          Album[]
+
+  // back-relation des commandes rattachées à cette galerie
+  orders Order[]
+
+  createdAt DateTime @default(now())
+}
+
+model Album {
+  id        String   @id @default(cuid())
+  title     String
+  gallery   Gallery  @relation(fields: [galleryId], references: [id])
+  galleryId String
+  createdAt DateTime @default(now())
+  photos    Photo[]
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  url       String
+  album     Album?   @relation(fields: [albumId], references: [id])
+  albumId   String?
+  gallery   Gallery  @relation(fields: [galleryId], references: [id])
+  galleryId String
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  active      Boolean @default(true)
+  prices      Price[]
+}
+
+model Price {
+  id            String  @id @default(cuid())
+  product       Product @relation(fields: [productId], references: [id])
+  productId     String
+  unitAmount    Int // cents
+  currency      String // "eur"
+  stripePriceId String? @unique
+  active        Boolean @default(true)
+
+  // back-relation vers OrderItem
+  orderItems OrderItem[]
+}
+
+model Order {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  // n-1 optionnel vers Gallery + back-relation sur Gallery.orders
+  gallery   Gallery? @relation(fields: [galleryId], references: [id])
+  galleryId String?
+
+  amount    Int
+  status    OrderStatus @default(PENDING)
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+
+  // 1-1 back-relation vers Commission (relation nommée)
+  commission Commission? @relation("OrderCommission")
+}
+
+model OrderItem {
+  id       String @id @default(cuid())
+  order    Order  @relation(fields: [orderId], references: [id])
+  orderId  String
+  price    Price  @relation(fields: [priceId], references: [id])
+  priceId  String
+  quantity Int    @default(1)
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
