@@ -1638,6 +1638,10 @@ video {
     justify-content: space-between;
   }
 
+  .sm\:bg-top {
+    background-position: top;
+  }
+
   .sm\:px-10 {
     padding-left: 2.5rem;
     padding-right: 2.5rem;
@@ -1769,6 +1773,14 @@ video {
 
   .lg\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .lg\:bg-cover {
+    background-size: cover;
+  }
+
+  .lg\:bg-center {
+    background-position: center;
   }
 
   .lg\:px-8 {

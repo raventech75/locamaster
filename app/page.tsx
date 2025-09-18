@@ -9,13 +9,11 @@ import { supabaseBrowser } from "@/lib/supabase-browser";
 export default function LandingPage() {
   return (
     <main className="min-h-screen relative text-white">
-      {/* Images en fond avec flou et ajustement responsive */}
-      <div className="absolute inset-0 z-0"
+      {/* Image de fond avec flou et ajustement responsive */}
+      <div className="absolute inset-0 z-0 bg-cover bg-center"
            style={{
              backgroundImage: 'url(/images/Gemini1.png), url(/images/Gemini2.png)',
-             backgroundPosition: 'center center',
-             backgroundSize: 'cover', // Assure que l'image couvre toute la surface sans distorsion
-             filter: 'blur(8px)',
+             filter: 'blur(8px)',  // Ajouter un flou pour améliorer la lisibilité
              backgroundRepeat: 'no-repeat',
              height: '100%',
            }}>
@@ -435,12 +433,12 @@ function FinalCTA() {
           />
         </label>
 
-             <label className="flex items-center gap-2 text-sm text-white/80">
+        <label className="flex items-center gap-2 text-sm text-white/80">
           <input type="checkbox" name="consent" required className="size-4 accent-emerald-400" />
           J’accepte d’être contacté(e) par LOCAMASTER (conforme RGPD).
         </label>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
           <button
             type="submit"
             className="px-5 py-3 rounded-xl bg-black/80 border border-white/20 text-white font-semibold hover:bg-black/70 disabled:opacity-60"
