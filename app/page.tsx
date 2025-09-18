@@ -9,39 +9,52 @@ import { supabaseBrowser } from "@/lib/supabase-browser";
 export default function LandingPage() {
   return (
     <main className="min-h-screen relative text-white">
-      {/* HERO réutilisable (fond confiné + CTA premium) */}
-      <HeroAuroraSection
-        chips={
-          <>
-            <Chip>Commission 25%</Chip>
-            <Chip>Zéro coût établissement</Chip>
-            <Chip>RGPD & galeries sécurisées</Chip>
-          </>
-        }
-        // imageUrl="/fond.png" // tu peux personnaliser l'image si besoin
-      />
+      {/* Images en fond avec flou et ajustement responsive */}
+      <div className="absolute inset-0 z-0" 
+           style={{
+             backgroundImage: 'url(/images/Gemini1.png), url(/images/Gemini2.png)',
+             backgroundPosition: 'center center',
+             backgroundSize: 'cover', // Assure que l'image couvre toute la surface sans distorsion
+             filter: 'blur(8px)',
+             backgroundRepeat: 'no-repeat',
+             height: '100%',
+           }}></div>
 
-      {/* Simulateur (panneau Aurora cohérent) */}
-      <section id="simulateur" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <CommissionSimulator />
-      </section>
+      {/* Contenu principal avec fond semi-transparent pour améliorer la lisibilité */}
+      <div className="relative z-10 bg-black/50 min-h-screen">
+        {/* HERO réutilisable (fond confiné + CTA premium) */}
+        <HeroAuroraSection
+          chips={
+            <>
+              <Chip>Commission 25%</Chip>
+              <Chip>Zéro coût établissement</Chip>
+              <Chip>RGPD & galeries sécurisées</Chip>
+            </>
+          }
+        />
 
-      {/* Témoignages */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <Testimonials />
-      </section>
+        {/* Simulateur (panneau Aurora cohérent) */}
+        <section id="simulateur" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <CommissionSimulator />
+        </section>
 
-      {/* FAQ */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <FAQ />
-      </section>
+        {/* Témoignages */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <Testimonials />
+        </section>
 
-      {/* CTA final (Formspree) */}
-      <section className="bg-gradient-to-r from-amber-500 via-pink-500 to-indigo-600 py-16">
-        <FinalCTA />
-      </section>
+        {/* FAQ */}
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <FAQ />
+        </section>
 
-      <Footer />
+        {/* CTA final (Formspree) */}
+        <section className="bg-gradient-to-r from-amber-500 via-pink-500 to-indigo-600 py-16">
+          <FinalCTA />
+        </section>
+
+        <Footer />
+      </div>
     </main>
   );
 }
@@ -217,8 +230,8 @@ function Testimonials() {
     },
   ];
   return (
-    <div>
-      <h2 className="text-3xl font-bold text-center mb-12">Ils nous font confiance</h2>
+    <div className="bg-black/40 bg-opacity-70 p-6 rounded-xl">
+      <h2 className="text-3xl font-bold text-center mb-12 text-white">Ils nous font confiance</h2>
       <div className="grid md:grid-cols-3 gap-6">
         {items.map((t, i) => (
           <div key={i} className="bg-white/10 p-6 rounded-2xl shadow flex flex-col">
@@ -251,12 +264,12 @@ function FAQ() {
     },
   ];
   return (
-    <div>
-      <h2 className="text-3xl font-bold text-center mb-12">Questions fréquentes</h2>
+    <div className="bg-black/40 bg-opacity-70 p-6 rounded-xl">
+      <h2 className="text-3xl font-bold text-center mb-12 text-white">Questions fréquentes</h2>
       <div className="space-y-6">
         {faqs.map((f, i) => (
           <div key={i} className="bg-white/10 p-6 rounded-2xl">
-            <p className="font-semibold">{f.q}</p>
+            <p className="font-semibold text-white">{f.q}</p>
             <p className="mt-2 text-white/80">{f.a}</p>
           </div>
         ))}
@@ -273,12 +286,17 @@ function FinalCTA() {
   // ⚠️ Mets ton vrai ID Formspree
   const FORMSPREE_ENDPOINT = "https://formspree.io/f/mvgboddq";
 
-  // petit helper de timeout pour éviter de bloquer l'UI si Formspree traîne
+  // Helper pour éviter de bloquer l'UI en cas de délai sur Formspree
   function withTimeout<T>(p: Promise<T>, ms = 6000): Promise<T> {
     return new Promise((resolve, reject) => {
       const t = setTimeout(() => reject(new Error("timeout")), ms);
-      p.then((v) => { clearTimeout(t); resolve(v); })
-       .catch((e) => { clearTimeout(t); reject(e); });
+      p.then((v) => {
+        clearTimeout(t);
+        resolve(v);
+      }).catch((e) => {
+        clearTimeout(t);
+        reject(e);
+      });
     });
   }
 
@@ -299,7 +317,7 @@ function FinalCTA() {
       source: "website",
     };
 
-    // 1) Envoi Formspree (fire & forget avec timeout)
+    // Envoi Formspree avec timeout
     const sendFormspree = withTimeout(
       fetch(FORMSPREE_ENDPOINT, {
         method: "POST",
@@ -309,30 +327,30 @@ function FinalCTA() {
       6000
     ).catch(() => null);
 
-    // 2) Enregistrement SERVEUR dans Supabase (toujours)
+    // Enregistrement dans Supabase (ou autre base)
     const sendSupabase = fetch("/api/lead", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(payload),
-})
-  .then(async (r) => {
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok || j?.ok !== true) {
-      console.warn("[/api/lead] response", r.status, j);
-      // surface the message in UI
-      throw new Error(j?.error || `HTTP ${r.status}`);
-    }
-    return true;
-  });
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(async (r) => {
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || j?.ok !== true) {
+          console.warn("[/api/lead] response", r.status, j);
+          // surface the message in UI
+          throw new Error(j?.error || `HTTP ${r.status}`);
+        }
+        return true;
+      });
 
-    // On attend les deux, mais on valide si AU MOINS l’un réussit
+    // Attendre les deux
     try {
       const [fsRes, sbRes] = await Promise.allSettled([sendFormspree, sendSupabase]);
 
       const supabaseOk =
         sbRes.status === "fulfilled" && (sbRes.value as any)?.ok === true;
       const formspreeOk =
-        fsRes.status === "fulfilled" && (fsRes.value as any)?.ok !== false; // fetch ok (même si Formspree renvoie pas JSON)
+        fsRes.status === "fulfilled" && (fsRes.value as any)?.ok !== false;
 
       if (supabaseOk || formspreeOk) {
         setStatus("ok");
@@ -341,7 +359,6 @@ function FinalCTA() {
         return;
       }
 
-      // Si les deux ont échoué
       setStatus("error");
       setMessage("Impossible d’envoyer votre demande. Réessayez un peu plus tard.");
     } catch {
@@ -423,7 +440,7 @@ function FinalCTA() {
         </label>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-          <button
+                   <button
             type="submit"
             className="px-5 py-3 rounded-xl bg-black/80 border border-white/20 text-white font-semibold hover:bg-black/70 disabled:opacity-60"
             disabled={status === "sending"}
@@ -454,6 +471,7 @@ function Footer() {
         <p>© {new Date().getFullYear()} LOCAMASTER. Tous droits réservés.</p>
         <div className="flex gap-4 mt-4 md:mt-0">
           <a href="/mentions-legales" className="hover:text-white">Mentions légales</a>
+          <a href="/contact" className="hover:text-white">Contact</a>
         </div>
       </div>
     </footer>

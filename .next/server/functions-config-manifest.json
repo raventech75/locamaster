@@ -1,1 +1,1 @@
-{"version":1,"functions":{"/api/health":{},"/admin/logout":{},"/api/debug-leads":{},"/api/leads":{},"/api/dashboard/overview":{},"/api/lead":{},"/api/leads/[id]":{},"/mentions-legales":{}}}
+{"version":1,"functions":{"/api/debug-leads":{},"/api/leads/[id]":{},"/admin/logout":{},"/api/lead":{},"/api/leads":{},"/api/health":{},"/api/dashboard/overview":{},"/mentions-legales":{}}}

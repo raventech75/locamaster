@@ -1,15 +1,15 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
-  "/admin/leads/page": "app/admin/leads/page.js",
   "/admin/page": "app/admin/page.js",
+  "/admin/leads/page": "app/admin/leads/page.js",
   "/page": "app/page.js",
-  "/admin/logout/route": "app/admin/logout/route.js",
   "/api/debug-leads/route": "app/api/debug-leads/route.js",
-  "/api/health/route": "app/api/health/route.js",
-  "/api/lead/route": "app/api/lead/route.js",
-  "/api/leads/[id]/route": "app/api/leads/[id]/route.js",
   "/api/dashboard/overview/route": "app/api/dashboard/overview/route.js",
+  "/admin/logout/route": "app/admin/logout/route.js",
+  "/api/health/route": "app/api/health/route.js",
   "/api/leads/route": "app/api/leads/route.js",
+  "/api/leads/[id]/route": "app/api/leads/[id]/route.js",
+  "/api/lead/route": "app/api/lead/route.js",
   "/mentions-legales/page": "app/mentions-legales/page.js",
   "/(app)/dashboard/page": "app/(app)/dashboard/page.js"
 }
