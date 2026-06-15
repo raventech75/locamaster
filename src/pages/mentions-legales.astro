@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout
+  title="Mentions légales"
+  description="Mentions légales de Locamaster."
+  canonical="/mentions-legales"
+  noIndex={true}
+>
+  <Navigation variant="solid" />
+  <main id="main-content">
+    <div class="section-pad bg-bg">
+      <div class="container-site max-w-2xl">
+        <h1 class="font-display text-ink mb-8">Mentions légales</h1>
+        <div class="prose-content flex flex-col gap-8 text-sm text-ink-2 leading-relaxed">
+          <section>
+            <h2 class="font-display text-base font-medium text-ink mb-3">Éditeur du site</h2>
+            <p>
+              Locamaster<br />
+              [Nom du responsable légal]<br />
+              [Adresse professionnelle]<br />
+              [Ville], France<br />
+              Email : contact@locamaster.fr<br />
+              Téléphone : 06 XX XX XX XX<br />
+              [Numéro SIRET ou SIREN]<br />
+              [Forme juridique : Auto-entrepreneur / EURL / etc.]
+            </p>
+          </section>
+          <section>
+            <h2 class="font-display text-base font-medium text-ink mb-3">Hébergement</h2>
+            <p>
+              Ce site est hébergé par Vercel Inc.<br />
+              340 Pine Street, Suite 701<br />
+              San Francisco, CA 94104 — États-Unis<br />
+              <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" class="text-accent hover:text-accent-hover">vercel.com</a>
+            </p>
+          </section>
+          <section>
+            <h2 class="font-display text-base font-medium text-ink mb-3">Propriété intellectuelle</h2>
+            <p>
+              L'ensemble des contenus de ce site (textes, photos, vidéos, logos) sont la propriété exclusive
+              de Locamaster, sauf mentions contraires. Toute reproduction, diffusion ou utilisation sans autorisation
+              écrite préalable est interdite.
+            </p>
+          </section>
+          <section>
+            <h2 class="font-display text-base font-medium text-ink mb-3">Données personnelles</h2>
+            <p>
+              Les données collectées via le formulaire de contact (nom, email, téléphone, message) sont utilisées
+              uniquement pour répondre à vos demandes et ne sont pas transmises à des tiers à des fins commerciales.
+              Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données.
+              Pour exercer ce droit : contact@locamaster.fr.
+            </p>
+          </section>
+        </div>
+        <div class="mt-10">
+          <a href="/" class="btn-secondary text-sm">← Retour à l'accueil</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

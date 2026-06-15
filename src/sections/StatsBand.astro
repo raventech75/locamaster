@@ -1,0 +1,47 @@
+---
+// Bande stats sombre — rythme noir/miel + compteurs animés au scroll.
+// Chiffres honnêtes, cohérents avec le positionnement solo premium.
+const stats = [
+  { value: 8, suffix: '', prefix: '', label: 'départements couverts', sub: 'Toute l\'Île-de-France' },
+  { value: 5, suffix: ' j', prefix: 'J+', label: 'délai de livraison', sub: 'Photos & vidéos montées' },
+  { value: 190, suffix: ' €', prefix: '', label: 'pour tester', sub: 'Session Découverte, sans risque' },
+  { value: 100, suffix: ' %', prefix: '', label: 'en direct', sub: 'Un seul interlocuteur, pas d\'agence' },
+];
+---
+
+<section class="section-pad-sm bg-ink text-bg overflow-hidden" aria-labelledby="stats-titre">
+  <div class="container-site">
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-12">
+      <div class="max-w-xl">
+        <div class="flex items-center gap-2 mb-5 text-2xs font-bold tracking-widest uppercase text-accent">
+          <span class="w-6 h-px bg-accent inline-block" aria-hidden="true"></span>
+          En chiffres
+        </div>
+        <h2 id="stats-titre" class="font-display font-bold text-bg leading-[0.95]">
+          Du concret,<br />pas du vent.
+        </h2>
+      </div>
+      <p class="text-bg/60 text-sm max-w-xs leading-relaxed">
+        Une approche simple et tenue : zone claire, délais courts, une offre
+        d'entrée à faible risque, et toujours la même personne en face de vous.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-bg/15 rounded-2xl overflow-hidden border border-bg/15">
+      {stats.map((stat) => (
+        <div data-reveal class="bg-ink p-6 md:p-8 flex flex-col gap-2">
+          <span
+            class="font-display font-bold text-5xl md:text-6xl text-accent leading-none tracking-tighter tabular-nums"
+            data-count={stat.value}
+            data-count-suffix={stat.suffix}
+            data-count-prefix={stat.prefix}
+          >
+            {stat.prefix}{stat.value}{stat.suffix}
+          </span>
+          <span class="font-semibold text-bg text-sm mt-2">{stat.label}</span>
+          <span class="text-bg/50 text-xs leading-snug">{stat.sub}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

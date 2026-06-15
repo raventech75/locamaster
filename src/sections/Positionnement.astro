@@ -1,0 +1,72 @@
+---
+// Section positionnement — "pourquoi l'image compte pour les artisans"
+---
+
+<section class="section-pad bg-bg" aria-labelledby="positionnement-titre">
+  <div class="container-site">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+      <!-- Texte gauche -->
+      <div>
+        <div class="flex items-center gap-3 mb-6">
+          <span class="accent-line" aria-hidden="true" />
+          <span class="section-label">Le constat</span>
+        </div>
+        <h2 id="positionnement-titre" class="font-display text-ink mb-6 text-balance">
+          Vous avez le savoir-faire.<br />
+          L'image suit rarement.
+        </h2>
+        <div class="flex flex-col gap-5 text-ink-2 leading-relaxed">
+          <p>
+            Un artisan qui fait bien son travail ne manque pas forcément de clients.
+            Mais à un moment, la croissance bute sur un plafond invisible : l'image.
+            Des photos floues, un profil Google vide, aucune vidéo — et le concurrent
+            d'en face, souvent moins bon, est perçu comme plus professionnel.
+          </p>
+          <p>
+            Ce n'est pas une question de taille d'entreprise. C'est une question
+            de présentation. Un artisan bien photographié et bien filmé inspire
+            confiance avant même la première conversation.
+          </p>
+          <p class="font-medium text-ink">
+            Locamaster existe pour combler cet écart — avec une approche
+            concrète, sans jargon, et un vrai niveau d'exigence visuelle.
+          </p>
+        </div>
+      </div>
+
+      <!-- Trois piliers -->
+      <div class="flex flex-col gap-5">
+        {[
+          {
+            numero: '01',
+            titre: 'Une image à la hauteur du travail',
+            texte: 'Vos réalisations sont belles. Elles doivent l\'être aussi en photo et en vidéo. C\'est le point de départ.',
+          },
+          {
+            numero: '02',
+            titre: 'Du contenu qui travaille pour vous',
+            texte: 'Une vidéo courte bien faite continue d\'attirer des clients des mois après sa mise en ligne. C\'est un investissement, pas une dépense.',
+          },
+          {
+            numero: '03',
+            titre: 'Une présence locale crédible',
+            texte: 'Fiche Google, photos pro, avis clients — les fondations d\'une présence locale qui convertit les recherches en appels.',
+          },
+        ].map((item) => (
+          <div class="flex gap-5 p-6 rounded-xl border border-border hover:border-border hover:shadow-sm transition-all duration-300 bg-white group">
+            <div class="flex-shrink-0">
+              <span class="font-display text-sm font-medium text-accent/60 group-hover:text-accent transition-colors duration-200">
+                {item.numero}
+              </span>
+            </div>
+            <div>
+              <h3 class="font-display text-lg font-medium text-ink mb-2 leading-snug">{item.titre}</h3>
+              <p class="text-sm text-ink-2 leading-relaxed">{item.texte}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

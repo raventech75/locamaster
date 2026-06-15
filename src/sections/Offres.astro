@@ -1,0 +1,196 @@
+---
+import { packs, abonnements } from '../data/offres';
+
+interface Props {
+  showTitle?: boolean;
+}
+const { showTitle = true } = Astro.props;
+---
+
+<section class="section-pad bg-surface" aria-labelledby="offres-titre" id="offres">
+  <div class="container-site">
+
+    <!-- Header -->
+    {showTitle && (
+      <div class="text-center max-w-2xl mx-auto mb-14">
+        <div class="flex items-center justify-center gap-3 mb-5">
+          <span class="accent-line" aria-hidden="true" />
+          <span class="section-label">Tarifs</span>
+          <span class="accent-line" aria-hidden="true" />
+        </div>
+        <h2 id="offres-titre" class="font-display text-ink mb-4">
+          Des offres lisibles,<br />sans surprise.
+        </h2>
+        <p class="text-lead">
+          Chaque projet peut être ajusté selon le besoin réel.
+          Ces packs sont des bases calibrées, pas des cartes rigides.
+        </p>
+      </div>
+    )}
+
+    <!-- Packs one-shot -->
+    <div class="mb-16">
+      <h3 class="font-display text-xl font-medium text-ink mb-2">Packs prestations</h3>
+      <p class="text-sm text-muted mb-8">Une intervention complète, un livrable final.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {packs.map((pack) => (
+          <div
+            class:list={[
+              'relative flex flex-col rounded-xl border transition-all duration-300',
+              pack.highlight
+                ? 'bg-ink border-ink text-white shadow-lg scale-[1.02]'
+                : 'bg-white border-border hover:border-accent/30 hover:shadow-md',
+            ]}
+          >
+            {/* Badge */}
+            {pack.badge && (
+              <div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <span class="bg-accent text-ink text-2xs font-sans font-medium tracking-widest uppercase px-4 py-1.5 rounded-full whitespace-nowrap shadow-accent">
+                  {pack.badge}
+                </span>
+              </div>
+            )}
+
+            <div class="p-7 flex flex-col flex-1 gap-5">
+              {/* Nom */}
+              <div class={pack.badge ? 'pt-2' : ''}>
+                <h4 class:list={['font-display text-xl font-medium leading-tight mb-1', pack.highlight ? 'text-white' : 'text-ink']}>
+                  {pack.nom}
+                </h4>
+              </div>
+
+              {/* Prix */}
+              <div>
+                <div class="flex items-baseline gap-2 mb-1">
+                  <span class:list={['font-display text-3xl font-medium', pack.highlight ? 'text-white' : 'text-ink']}>
+                    {pack.tarifLancement.toLocaleString('fr-FR')} €
+                  </span>
+                  <span class:list={['text-xs font-sans', pack.highlight ? 'text-white/60' : 'text-muted']}>HT</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class:list={['text-xs line-through', pack.highlight ? 'text-white/40' : 'text-muted']}>
+                    conseillé {pack.tarif.toLocaleString('fr-FR')} €
+                  </span>
+                  <span class="badge text-2xs">Prix lancement</span>
+                </div>
+              </div>
+
+              {/* Livrables */}
+              <ul class="flex flex-col gap-2.5 flex-1" role="list">
+                {pack.livrables.map((livrable) => (
+                  <li class:list={['flex items-start gap-2.5 text-sm', pack.highlight ? 'text-white/80' : 'text-ink-2']}>
+                    <svg
+                      class:list={['w-4 h-4 flex-shrink-0 mt-0.5', pack.highlight ? 'text-accent' : 'text-accent']}
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {livrable}
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA */}
+              <a
+                href={`/contact?offre=${pack.id}`}
+                class:list={[
+                  'mt-auto text-center py-3 px-6 rounded font-sans font-medium text-sm transition-all duration-200',
+                  pack.highlight
+                    ? 'bg-accent text-ink hover:bg-accent-hover shadow-accent'
+                    : 'bg-surface text-ink border border-border hover:border-accent hover:text-accent',
+                ]}
+              >
+                Demander ce pack
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Abonnements -->
+    <div>
+      <h3 class="font-display text-xl font-medium text-ink mb-2">Abonnements mensuels</h3>
+      <p class="text-sm text-muted mb-8">Contenu régulier, présence continue. Engagement minimum 3 mois.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {abonnements.map((abo) => (
+          <div
+            class:list={[
+              'relative flex flex-col rounded-xl border transition-all duration-300',
+              abo.highlight
+                ? 'bg-ink border-ink text-white shadow-lg scale-[1.02]'
+                : 'bg-white border-border hover:border-accent/30 hover:shadow-md',
+            ]}
+          >
+            {abo.badge && (
+              <div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <span class="bg-accent text-ink text-2xs font-sans font-medium tracking-widest uppercase px-4 py-1.5 rounded-full whitespace-nowrap shadow-accent">
+                  {abo.badge}
+                </span>
+              </div>
+            )}
+
+            <div class="p-7 flex flex-col flex-1 gap-5">
+              <div class={abo.badge ? 'pt-2' : ''}>
+                <h4 class:list={['font-display text-xl font-medium leading-tight mb-1', abo.highlight ? 'text-white' : 'text-ink']}>
+                  {abo.nom}
+                </h4>
+              </div>
+
+              <div>
+                <div class="flex items-baseline gap-2 mb-1">
+                  <span class:list={['font-display text-3xl font-medium', abo.highlight ? 'text-white' : 'text-ink']}>
+                    {abo.tarifLancement.toLocaleString('fr-FR')} €
+                  </span>
+                  <span class:list={['text-xs font-sans', abo.highlight ? 'text-white/60' : 'text-muted']}>HT / mois</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class:list={['text-xs line-through', abo.highlight ? 'text-white/40' : 'text-muted']}>
+                    conseillé {abo.tarif.toLocaleString('fr-FR')} €
+                  </span>
+                  <span class="badge text-2xs">Prix lancement</span>
+                </div>
+              </div>
+
+              <ul class="flex flex-col gap-2.5 flex-1" role="list">
+                {abo.livrables.map((livrable) => (
+                  <li class:list={['flex items-start gap-2.5 text-sm', abo.highlight ? 'text-white/80' : 'text-ink-2']}>
+                    <svg
+                      class="w-4 h-4 text-accent flex-shrink-0 mt-0.5"
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {livrable}
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href={`/contact?offre=${abo.id}`}
+                class:list={[
+                  'mt-auto text-center py-3 px-6 rounded font-sans font-medium text-sm transition-all duration-200',
+                  abo.highlight
+                    ? 'bg-accent text-ink hover:bg-accent-hover shadow-accent'
+                    : 'bg-surface text-ink border border-border hover:border-accent hover:text-accent',
+                ]}
+              >
+                Souscrire
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Note bas -->
+    <p class="text-center text-sm text-muted mt-10">
+      Chaque projet peut être ajusté selon le besoin réel. —
+      <a href="/contact" class="text-accent hover:text-accent-hover font-medium transition-colors duration-200">
+        Discutons de votre situation
+      </a>
+    </p>
+  </div>
+</section>

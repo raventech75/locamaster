@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import Offres from '../sections/Offres.astro';
+import SessionDecouverte from '../sections/SessionDecouverte.astro';
+import CTAFinale from '../sections/CTAFinale.astro';
+import FAQ from '../sections/FAQ.astro';
+---
+
+<BaseLayout
+  title="Offres & Tarifs"
+  description="Packs photo vidéo branding pour artisans et entreprises locales en Île-de-France. Tarifs transparents, livrables précis. À partir de 190 € HT."
+  canonical="/offres"
+>
+  <Navigation variant="solid" />
+  <main id="main-content">
+
+    <!-- Page hero -->
+    <div class="bg-surface section-pad-sm">
+      <div class="container-site max-w-3xl">
+        <div class="flex items-center gap-3 mb-5">
+          <span class="accent-line" aria-hidden="true" />
+          <span class="section-label">Tarifs</span>
+        </div>
+        <h1 class="font-display text-ink mb-5">
+          Des offres claires,<br />
+          des résultats réels.
+        </h1>
+        <p class="text-lead max-w-xl">
+          Tout est affiché. Pas de surprises en cours de route, pas de coûts cachés.
+          Vous savez ce que vous payez avant de signer.
+        </p>
+      </div>
+    </div>
+
+    <SessionDecouverte />
+    <Offres showTitle={false} />
+
+    <!-- Section "sur mesure" -->
+    <section class="section-pad-sm bg-bg">
+      <div class="container-site max-w-3xl">
+        <div class="card-surface flex flex-col sm:flex-row items-start gap-6">
+          <div class="flex-1">
+            <h2 class="font-display text-xl font-medium text-ink mb-3">Projet sur mesure</h2>
+            <p class="text-sm text-ink-2 leading-relaxed">
+              Votre besoin sort des cases standards ? C'est souvent le cas.
+              Un appel de 20 minutes suffit pour comprendre ce dont vous avez besoin
+              et construire une proposition adaptée à votre situation.
+            </p>
+          </div>
+          <a href="/contact" class="btn-primary flex-shrink-0">
+            En discuter
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <FAQ />
+    <CTAFinale />
+  </main>
+  <Footer />
+</BaseLayout>

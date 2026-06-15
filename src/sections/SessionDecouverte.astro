@@ -1,0 +1,101 @@
+---
+// Section offre d'appel — Session Découverte Signature à 190 € HT
+// Importance stratégique : première porte d'entrée commerciale
+import RotatingBadge from '../components/ui/RotatingBadge.astro';
+---
+
+<section class="section-pad bg-bg" aria-labelledby="session-titre" id="session-decouverte">
+  <div class="container-site">
+    <div class="max-w-5xl mx-auto relative">
+      <!-- Badge rotatif qui chevauche le coin de la carte -->
+      <div class="hidden md:block absolute -top-8 -right-6 z-20">
+        <RotatingBadge size={132} />
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-0 rounded-2xl overflow-hidden border border-border shadow-lg">
+
+        <!-- Côté gauche — image / visuel -->
+        <div class="lg:col-span-2 relative min-h-64 lg:min-h-auto">
+          <img
+            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80&auto=format"
+            alt="Photographe professionnel au travail"
+            class="w-full h-full object-cover"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-r from-transparent to-ink/10" aria-hidden="true" />
+          <!-- Badge prix -->
+          <div class="absolute top-6 left-6">
+            <div class="bg-accent text-ink font-display font-medium text-2xl px-5 py-3 rounded-lg shadow-accent">
+              190 €<span class="text-sm font-sans font-normal opacity-75 ml-1">HT</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Côté droit — contenu -->
+        <div class="lg:col-span-3 bg-white p-8 md:p-10">
+          <!-- Label -->
+          <div class="flex items-center gap-3 mb-5">
+            <span class="badge">Offre d'entrée</span>
+            <span class="badge-dark">Faible risque</span>
+          </div>
+
+          <h2 id="session-titre" class="font-display text-2xl md:text-3xl font-medium text-ink mb-3 leading-tight">
+            Session Découverte Signature
+          </h2>
+          <p class="text-ink-2 leading-relaxed mb-7">
+            Une façon simple de commencer : vous voyez comment je travaille,
+            vous obtenez un premier résultat concret, et vous décidez ensuite
+            si vous voulez aller plus loin.
+          </p>
+
+          <!-- Livrables -->
+          <div class="mb-8">
+            <h3 class="text-xs font-sans font-medium tracking-widest uppercase text-muted mb-4">
+              Ce que vous recevez
+            </h3>
+            <ul class="flex flex-col gap-3" role="list">
+              {[
+                'Échange préalable rapide pour cadrer vos besoins',
+                '45 à 60 minutes de shooting sur votre lieu de travail',
+                '5 photos premium retouchées — livrées en 5 jours',
+                '1 vidéo verticale courte (20 à 30 s) prête à publier',
+                '1 regard stratégique sur votre image et présence locale',
+              ].map((item) => (
+                <li class="flex items-start gap-3 text-sm text-ink-2">
+                  <svg class="w-4 h-4 text-accent flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <!-- Note déduction -->
+          <div class="bg-accent-soft border border-accent/20 rounded-lg px-5 py-4 mb-8">
+            <p class="text-sm text-accent-text font-medium leading-relaxed">
+              <svg class="w-4 h-4 inline mr-1.5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Les 190 € HT de la Session Découverte Signature sont déduits de votre futur pack
+              si le projet démarre dans les 30 jours.
+            </p>
+          </div>
+
+          <!-- CTA -->
+          <div class="flex flex-wrap gap-3">
+            <a href="/contact?offre=session-decouverte" class="btn-primary">
+              Réserver ma session
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </a>
+            <a href="/offres" class="btn-secondary">
+              Voir tous les packs
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

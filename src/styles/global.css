@@ -1,0 +1,379 @@
+/* ----------------------------------------------------------------
+   Fonts — @import doit précéder toutes les autres déclarations CSS
+   Bricolage Grotesque (display éditorial) + Inter (texte)
+   Remplacer par self-hosted en production pour meilleures perfs
+   ---------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ----------------------------------------------------------------
+   Base
+   ---------------------------------------------------------------- */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    @apply scroll-smooth;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-bg text-ink font-sans;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold leading-none text-ink tracking-tighter;
+  }
+
+  h1 { @apply text-5xl md:text-7xl lg:text-8xl font-bold; }
+  h2 { @apply text-4xl md:text-5xl lg:text-6xl; }
+  h3 { @apply text-2xl md:text-3xl; }
+  h4 { @apply text-xl md:text-2xl; }
+
+  p {
+    @apply leading-relaxed;
+  }
+
+  img {
+    @apply max-w-full h-auto;
+  }
+
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  ::selection {
+    @apply bg-accent text-ink;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ink rounded-sm;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Components — design system
+   ---------------------------------------------------------------- */
+@layer components {
+  /* Conteneur principal */
+  .container-site {
+    @apply max-w-7xl mx-auto px-5 sm:px-8 lg:px-12;
+  }
+
+  /* Section padding */
+  .section-pad {
+    @apply py-24 md:py-32 lg:py-40;
+  }
+
+  .section-pad-sm {
+    @apply py-16 md:py-24;
+  }
+
+  /* Boutons — pill, bold, tranché */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-7 py-3.5 bg-ink text-bg font-sans font-semibold text-sm tracking-tight rounded-full
+           hover:bg-accent hover:text-ink active:scale-[0.97] transition-all duration-300 ease-spring;
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center gap-2 px-7 py-3.5 bg-accent text-ink font-sans font-semibold text-sm tracking-tight rounded-full
+           hover:bg-ink hover:text-bg active:scale-[0.97] transition-all duration-300 ease-spring;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-7 py-3.5 bg-transparent text-ink font-sans font-semibold text-sm tracking-tight rounded-full
+           border-2 border-ink hover:bg-ink hover:text-bg active:scale-[0.97] transition-all duration-300 ease-spring;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 text-ink font-sans font-semibold text-sm tracking-tight
+           hover:text-accent-hover transition-colors duration-200;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-2xl border-2 border-ink p-6 transition-all duration-300;
+  }
+
+  .card-hover {
+    @apply hover:-translate-y-1 hover:shadow-brutal;
+  }
+
+  .card-surface {
+    @apply bg-surface rounded-2xl border border-border p-6;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-3.5 py-1.5 text-2xs font-sans font-bold tracking-widest uppercase
+           rounded-full bg-accent text-ink;
+  }
+
+  .badge-outline {
+    @apply inline-flex items-center px-3.5 py-1.5 text-2xs font-sans font-bold tracking-widest uppercase
+           rounded-full border-2 border-ink text-ink;
+  }
+
+  .badge-dark {
+    @apply inline-flex items-center px-3.5 py-1.5 text-2xs font-sans font-bold tracking-widest uppercase
+           rounded-full bg-ink text-bg;
+  }
+
+  /* Divider accent */
+  .accent-line {
+    @apply w-12 h-1 bg-accent rounded-full;
+  }
+
+  /* Section label — pill éditorial */
+  .section-label {
+    @apply inline-flex items-center gap-2 text-2xs font-sans font-bold tracking-widest uppercase text-ink
+           before:content-[''] before:w-6 before:h-px before:bg-accent before:inline-block;
+  }
+
+  /* Texte lead */
+  .text-lead {
+    @apply text-lg md:text-xl text-ink-2 leading-relaxed font-normal;
+  }
+
+  /* Surlignage miel sous un mot */
+  .highlight {
+    @apply relative inline-block;
+    background-image: linear-gradient(transparent 60%, theme('colors.accent') 60%);
+    background-size: 100% 100%;
+    padding: 0 0.08em;
+  }
+
+  /* Grille portfolio */
+  .portfolio-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6;
+  }
+
+  /* Formulaire */
+  .form-input {
+    @apply w-full px-4 py-3.5 bg-white border-2 border-border rounded-xl text-ink placeholder-muted text-sm
+           focus:outline-none focus:border-ink
+           transition-colors duration-200;
+  }
+
+  .form-label {
+    @apply block text-sm font-sans font-semibold text-ink mb-1.5;
+  }
+
+  .form-select {
+    @apply w-full px-4 py-3.5 bg-white border-2 border-border rounded-xl text-ink text-sm
+           focus:outline-none focus:border-ink
+           transition-colors duration-200 appearance-none;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Utilities
+   ---------------------------------------------------------------- */
+/* ----------------------------------------------------------------
+   Lenis (smooth scroll) — CSS recommandé
+   ---------------------------------------------------------------- */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* ----------------------------------------------------------------
+   Intro de chargement (preloader) — affiché une fois par session
+   ---------------------------------------------------------------- */
+#luxe-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background-color: #15120D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 22px;
+}
+#luxe-loader .loader-mark {
+  width: 76px;
+  height: 76px;
+  background-color: #F2B01E;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bricolage Grotesque', serif;
+  font-weight: 800;
+  font-size: 42px;
+  color: #15120D;
+}
+#luxe-loader .loader-bar {
+  width: 160px;
+  height: 3px;
+  background-color: rgba(251, 249, 244, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+#luxe-loader .loader-bar span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background-color: #F2B01E;
+  border-radius: 999px;
+}
+/* Masqué dès que la session a déjà vu l'intro, ou en reduced-motion */
+.loaded #luxe-loader {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  #luxe-loader {
+    display: none;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Rideau de transition entre pages (View Transitions)
+   ---------------------------------------------------------------- */
+#luxe-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background-color: #F2B01E;
+  transform: scaleY(0);
+  transform-origin: bottom center;
+  pointer-events: none;
+  will-change: transform;
+}
+/* On remplace le cross-fade par défaut d'Astro par notre rideau */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* ----------------------------------------------------------------
+   Badge circulaire rotatif (décor "vivant")
+   ---------------------------------------------------------------- */
+.spin-badge {
+  animation: spin-slow 16s linear infinite;
+}
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin-badge {
+    animation: none;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Curseur custom (desktop / pointeur fin uniquement)
+   Le curseur natif reste actif (accessibilité) — ceci s'ajoute par-dessus.
+   ---------------------------------------------------------------- */
+#luxe-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 2px solid #15120D;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform;
+  transition: width 0.25s ease, height 0.25s ease, margin 0.25s ease,
+    background-color 0.25s ease, border-color 0.25s ease;
+}
+#luxe-cursor.is-hover {
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  background-color: rgba(242, 176, 30, 0.18);
+  border-color: #F2B01E;
+}
+#luxe-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background-color: #15120D;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform;
+}
+@media (pointer: coarse) {
+  #luxe-cursor,
+  #luxe-dot {
+    display: none;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Anti-FOUC des animations GSAP
+   .has-luxe n'est posé sur <html> qu'en JS et hors prefers-reduced-motion.
+   Si JS désactivé / reduced-motion : le contenu reste visible.
+   Doit rester synchronisé avec REVEAL_SELECTOR de src/scripts/luxe.ts
+   ---------------------------------------------------------------- */
+.has-luxe [data-hero-el],
+.has-luxe [data-reveal],
+.has-luxe main section:not([data-hero]) h2,
+.has-luxe main section:not([data-hero]) .section-label,
+.has-luxe main .card,
+.has-luxe main .card-surface {
+  opacity: 0;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .overlay-dark {
+    background: linear-gradient(to top, rgba(21,18,13,0.88) 0%, rgba(21,18,13,0.25) 55%, rgba(21,18,13,0.1) 100%);
+  }
+
+  .overlay-dark-full {
+    background: rgba(21,18,13,0.62);
+  }
+
+  .snap-x-mandatory {
+    scroll-snap-type: x mandatory;
+  }
+
+  .snap-start {
+    scroll-snap-align: start;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

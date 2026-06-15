@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+.output/
+.vercel/
+.netlify/
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Astro cache
+.astro/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/extensions.json
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Média lourds — ne pas commiter dans le repo
+# Stocker via Vercel Blob ou Supabase Storage
+public/videos/*.mp4
+public/videos/*.mov
+public/videos/*.webm

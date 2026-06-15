@@ -1,0 +1,87 @@
+---
+// Section "Comment ça se passe" — 4 étapes
+---
+
+<section class="section-pad bg-bg" aria-labelledby="process-titre" id="process">
+  <div class="container-site">
+    <div class="max-w-2xl mb-14">
+      <div class="flex items-center gap-3 mb-5">
+        <span class="accent-line" aria-hidden="true" />
+        <span class="section-label">Le processus</span>
+      </div>
+      <h2 id="process-titre" class="font-display text-ink mb-4">
+        Comment ça se passe ?
+      </h2>
+      <p class="text-lead">
+        Simple, rapide, sans friction. Quatre étapes de la prise de contact
+        à la livraison finale.
+      </p>
+    </div>
+
+    <!-- Étapes -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[
+        {
+          numero: '01',
+          titre: 'Échange',
+          description:
+            'Un appel de 20 minutes pour comprendre votre activité, vos besoins et vos objectifs. Aucune formalité inutile.',
+          icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />`,
+        },
+        {
+          numero: '02',
+          titre: 'Proposition',
+          description:
+            "Un devis clair, une date de tournage, un brief simple. Vous savez exactement ce qui va se passer et combien ça coûte.",
+          icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />`,
+        },
+        {
+          numero: '03',
+          titre: 'Tournage',
+          description:
+            "Je viens chez vous ou sur votre chantier. Le tournage est efficace et discret — votre équipe continue de travailler normalement.",
+          icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />`,
+        },
+        {
+          numero: '04',
+          titre: 'Livraison',
+          description:
+            "Photos retouchées et vidéos montées livrées par lien de téléchargement. Prêtes à être publiées, directement utilisables.",
+          icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />`,
+        },
+      ].map((etape, index) => (
+        <div class="relative flex flex-col">
+          {/* Connecteur entre les étapes (desktop) */}
+          {index < 3 && (
+            <div class="hidden lg:block absolute top-8 left-[calc(100%+0.5rem)] w-[calc(100%-1rem)] h-px bg-border z-0" aria-hidden="true" />
+          )}
+
+          <div class="card-surface flex flex-col gap-4 relative">
+            {/* Numéro + icône */}
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 bg-accent-soft rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" set:html={etape.icon} />
+              </div>
+              <span class="font-display text-3xl font-medium text-border">{etape.numero}</span>
+            </div>
+            <div>
+              <h3 class="font-display text-lg font-medium text-ink mb-2">{etape.titre}</h3>
+              <p class="text-sm text-ink-2 leading-relaxed">{etape.description}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- CTA rapide -->
+    <div class="mt-12 flex flex-col sm:flex-row items-start sm:items-center gap-4 p-6 bg-surface rounded-xl border border-border">
+      <p class="text-sm text-ink-2 flex-1">
+        <strong class="font-medium text-ink">Délai moyen :</strong> de la prise de contact à la livraison finale —
+        moins de 2 semaines pour un pack standard.
+      </p>
+      <a href="/contact" class="btn-primary flex-shrink-0 text-sm">
+        Commencer
+      </a>
+    </div>
+  </div>
+</section>

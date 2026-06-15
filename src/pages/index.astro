@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import Hero from '../sections/Hero.astro';
+import Positionnement from '../sections/Positionnement.astro';
+import Services from '../sections/Services.astro';
+import StatsBand from '../sections/StatsBand.astro';
+import SessionDecouverte from '../sections/SessionDecouverte.astro';
+import Offres from '../sections/Offres.astro';
+import Process from '../sections/Process.astro';
+import PourquoiLocamaster from '../sections/PourquoiLocamaster.astro';
+import PortfolioPreview from '../sections/PortfolioPreview.astro';
+import CasUsage from '../sections/CasUsage.astro';
+import FAQ from '../sections/FAQ.astro';
+import CTAFinale from '../sections/CTAFinale.astro';
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Locamaster — Branding, photo et vidéo pour artisans en Île-de-France",
+  "description": "Studio visuel solo pour artisans et PME locales. Photo pro, vidéos réseaux, branding complet. Île-de-France.",
+  "url": "https://locamaster.fr",
+  "mainEntity": {
+    "@type": "LocalBusiness",
+    "name": "Locamaster",
+    "description": "Branding, photo et vidéo pour artisans et entreprises locales en Île-de-France.",
+  }
+};
+---
+
+<BaseLayout
+  title="Locamaster — Branding, photo et vidéo pour artisans en Île-de-France"
+  description="Studio visuel solo pour artisans et entreprises locales. Photo professionnelle, vidéos réseaux sociaux, branding complet. Île-de-France."
+  schema={schema}
+>
+  <Navigation variant="transparent" />
+  <main id="main-content">
+    <Hero />
+    <Positionnement />
+    <Services />
+    <StatsBand />
+    <SessionDecouverte />
+    <Process />
+    <PourquoiLocamaster />
+    <PortfolioPreview />
+    <Offres />
+    <CasUsage />
+    <FAQ />
+    <CTAFinale />
+  </main>
+  <Footer />
+</BaseLayout>

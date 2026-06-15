@@ -1,0 +1,111 @@
+---
+// Cas d'usage par métier — crédibilité terrain
+---
+
+<section class="section-pad bg-bg" aria-labelledby="cas-titre" id="cas-usage">
+  <div class="container-site">
+    <div class="max-w-2xl mb-14">
+      <div class="flex items-center gap-3 mb-5">
+        <span class="accent-line" aria-hidden="true" />
+        <span class="section-label">Cas concrets</span>
+      </div>
+      <h2 id="cas-titre" class="font-display text-ink mb-4">
+        Pour quel métier,<br />quel bénéfice ?
+      </h2>
+      <p class="text-lead">
+        Chaque secteur a ses contraintes et ses enjeux visuels.
+        Voici ce que Locamaster peut apporter concrètement.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {[
+        {
+          secteur: 'Plombier / Chauffagiste',
+          emoji: '🔧',
+          besoin: 'Manque de visibilité en ligne face aux grandes enseignes. Photos de chantier floues ou absentes.',
+          solution: 'Shooting sur 2 chantiers récents + vidéo courte "avant/après" + fiche Google optimisée.',
+          livrables: ['10 photos pro', '2 vidéos réseaux', 'Fiche Google'],
+          benefice: 'Une image crédible qui justifie les devis et réduit les négociations tarifaires.',
+        },
+        {
+          secteur: 'Cuisiniste',
+          emoji: '🏠',
+          besoin: 'Des réalisations superbes mais des photos Instagram au smartphone qui ne rendent pas justice au travail.',
+          solution: 'Shooting multi-angles des réalisations finies + vidéo de présentation de l\'atelier.',
+          livrables: ['20 photos chantiers', '1 vidéo atelier', '3 vidéos courtes'],
+          benefice: 'Un portfolio visuel qui parle tout seul aux prospects et justifie un positionnement haut de gamme.',
+        },
+        {
+          secteur: 'Menuisier / Ébéniste',
+          emoji: '🪵',
+          besoin: 'Travail exceptionnel mais aucun contenu pour le montrer aux prescripteurs et architectes.',
+          solution: 'Film vitrine centré sur le geste et la matière + série de photos produit.',
+          livrables: ['1 film vitrine', '15 photos atelier', '2 vidéos courtes'],
+          benefice: 'Un outil commercial premium pour les rendez-vous prescripteurs et la prospection architectes.',
+        },
+        {
+          secteur: 'Électricien / Tertiaire',
+          emoji: '⚡',
+          besoin: 'Besoin de contenus réguliers pour LinkedIn et Instagram sans bloquer les équipes.',
+          solution: 'Abonnement mensuel — tournage lors des interventions, montage et publication simplifiés.',
+          livrables: ['4 vidéos / mois', '8 photos / mois', 'Script mensuel'],
+          benefice: 'Présence régulière sur les réseaux et contacts entrants qualifiés en continu.',
+        },
+        {
+          secteur: 'Entreprise de rénovation',
+          emoji: '🏗️',
+          besoin: 'Identité visuelle incohérente, site daté, aucun contenu professionnel malgré de beaux chantiers.',
+          solution: 'Pack Premium Artisan complet — identité, photos, vidéos et film vitrine en 6 semaines.',
+          livrables: ['Identité visuelle', '40 photos', '8 vidéos + 1 film'],
+          benefice: 'Refonte complète de l\'image. Repositionnement tarifaire facilité dès le premier rendez-vous.',
+        },
+        {
+          secteur: 'Indépendant / TPE',
+          emoji: '👤',
+          besoin: 'Budget limité mais besoin urgent d\'une image professionnelle pour décrocher les premiers contrats sérieux.',
+          solution: 'Session Découverte Signature — premier résultat concret à 190 € HT, sans engagement long terme.',
+          livrables: ['5 photos pro', '1 vidéo courte', 'Mini conseil image'],
+          benefice: 'Un premier contenu pro qui crédibilise immédiatement la démarche commerciale.',
+        },
+      ].map((cas) => (
+        <div class="card group">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-2xl" aria-hidden="true">{cas.emoji}</span>
+            <h3 class="font-display font-medium text-base text-ink leading-snug">{cas.secteur}</h3>
+          </div>
+
+          <div class="flex flex-col gap-4 text-sm">
+            <div>
+              <span class="text-2xs font-sans font-medium tracking-widest uppercase text-muted block mb-1.5">Le besoin</span>
+              <p class="text-ink-2 leading-relaxed">{cas.besoin}</p>
+            </div>
+            <div>
+              <span class="text-2xs font-sans font-medium tracking-widest uppercase text-muted block mb-1.5">La solution</span>
+              <p class="text-ink-2 leading-relaxed">{cas.solution}</p>
+            </div>
+            <div>
+              <span class="text-2xs font-sans font-medium tracking-widest uppercase text-muted block mb-2">Livrables</span>
+              <div class="flex flex-wrap gap-1.5">
+                {cas.livrables.map((l) => (
+                  <span class="text-2xs px-2 py-1 bg-surface rounded text-ink-2 font-sans">{l}</span>
+                ))}
+              </div>
+            </div>
+            <div class="pt-1 border-t border-border">
+              <span class="text-2xs font-sans font-medium tracking-widest uppercase text-accent block mb-1.5">Le bénéfice</span>
+              <p class="text-ink font-medium leading-relaxed text-xs">{cas.benefice}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="mt-10 text-center">
+      <p class="text-sm text-muted mb-5">Votre secteur n'est pas listé ? Il y a de bonnes chances que Locamaster puisse intervenir.</p>
+      <a href="/contact" class="btn-primary">
+        Parlons de votre projet
+      </a>
+    </div>
+  </div>
+</section>

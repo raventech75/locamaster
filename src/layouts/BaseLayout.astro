@@ -1,0 +1,134 @@
+---
+import '../styles/global.css';
+import { ViewTransitions } from 'astro:transitions';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  canonical?: string;
+  noIndex?: boolean;
+  schema?: object;
+}
+
+const {
+  title,
+  description = 'Branding, photo et vidéo professionnels pour artisans et entreprises locales en Île-de-France. Locamaster — studio visuel solo, exigence premium.',
+  ogImage = '/images/og-default.jpg',
+  canonical,
+  noIndex = false,
+  schema,
+} = Astro.props;
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://locamaster.fr';
+const canonicalUrl = canonical ? `${siteUrl}${canonical}` : `${siteUrl}${Astro.url.pathname}`;
+const fullTitle = title === 'Locamaster' ? title : `${title} — Locamaster`;
+---
+
+<!doctype html>
+<html lang="fr" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- SEO -->
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Locamaster" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={`${siteUrl}${ogImage}`} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="fr_FR" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${siteUrl}${ogImage}`} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- JSON-LD Schema -->
+    {schema && (
+      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    )}
+
+    <!-- Schema Organisation par défaut -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Locamaster",
+      "description": "Studio de branding, photo et vidéo pour artisans et entreprises locales en Île-de-France.",
+      "url": siteUrl,
+      "telephone": "+33 6 XX XX XX XX",
+      "email": "contact@locamaster.fr",
+      "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "Île-de-France",
+        "addressCountry": "FR"
+      },
+      "areaServed": {
+        "@type": "GeoCircle",
+        "geoMidpoint": {
+          "@type": "GeoCoordinates",
+          "latitude": 48.8566,
+          "longitude": 2.3522
+        },
+        "geoRadius": "80000"
+      },
+      "priceRange": "€€",
+      "sameAs": [
+        "https://www.instagram.com/locamaster"
+      ]
+    })} />
+
+    <!-- Preconnect fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Transitions de page fluides -->
+    <ViewTransitions />
+
+    <!-- Active les animations GSAP uniquement hors prefers-reduced-motion.
+         Posé en <head> de façon synchrone pour masquer les éléments
+         révélés avant le premier paint (anti-FOUC).
+         Masque aussi l'intro de chargement si déjà vue cette session. -->
+    <script is:inline>
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('has-luxe');
+      }
+      if (sessionStorage.getItem('lm-loaded')) {
+        document.documentElement.classList.add('loaded');
+      }
+      // Failsafe ultime : le loader ne doit jamais bloquer le site
+      setTimeout(function () {
+        document.documentElement.classList.add('loaded');
+      }, 3200);
+    </script>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <!-- Intro de chargement (une fois par session) -->
+    <div id="luxe-loader" aria-hidden="true">
+      <div class="loader-mark">L</div>
+      <div class="loader-bar"><span></span></div>
+    </div>
+
+    <slot />
+
+    <!-- Système d'animation luxe (GSAP + Lenis + loader + rideau) -->
+    <script>
+      import '../scripts/luxe.ts';
+    </script>
+  </body>
+</html>

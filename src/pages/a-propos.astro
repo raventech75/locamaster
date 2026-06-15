@@ -1,0 +1,150 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import CTAFinale from '../sections/CTAFinale.astro';
+---
+
+<BaseLayout
+  title="À propos"
+  description="Locamaster — studio visuel solo pour artisans et entreprises locales en Île-de-France. Vidéaste et photographe premium, spécialisé en branding artisanal."
+  canonical="/a-propos"
+>
+  <Navigation variant="solid" />
+  <main id="main-content">
+
+    <!-- Hero page -->
+    <section class="section-pad bg-surface">
+      <div class="container-site">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+          <!-- Texte -->
+          <div>
+            <div class="flex items-center gap-3 mb-6">
+              <span class="accent-line" aria-hidden="true" />
+              <span class="section-label">À propos</span>
+            </div>
+            <h1 class="font-display text-ink mb-6">
+              Derrière Locamaster,<br />
+              un seul interlocuteur.
+            </h1>
+            <div class="flex flex-col gap-5 text-ink-2 leading-relaxed">
+              <p>
+                Je suis vidéaste et photographe, basé en Île-de-France.
+                Avant de créer Locamaster, j'ai exercé pendant plusieurs années
+                dans la vidéo de mariage premium — un secteur exigeant où la qualité
+                technique et la relation humaine sont indissociables.
+              </p>
+              <p>
+                Ce que j'ai appris : les meilleurs résultats viennent quand on
+                comprend vraiment ce que les gens font, pas seulement ce qu'ils
+                veulent montrer. C'est ce que j'applique maintenant avec les artisans
+                et les entreprises locales.
+              </p>
+              <p>
+                Locamaster, c'est une approche simple et directe :
+                vous avez un savoir-faire réel, j'ai les outils pour le rendre visible.
+                Pas de jargon, pas de promesses creuses, pas de dix-huit interlocuteurs.
+                Un seul.
+              </p>
+            </div>
+          </div>
+
+          <!-- Photo profil -->
+          <div class="relative">
+            <div class="aspect-[3/4] rounded-2xl overflow-hidden bg-surface border border-border max-w-sm mx-auto lg:mx-0">
+              <!-- Placeholder photo — remplacer par une vraie photo du fondateur -->
+              <img
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80&auto=format"
+                alt="Fondateur de Locamaster en tournage"
+                class="w-full h-full object-cover"
+                loading="eager"
+              />
+            </div>
+            <!-- Décoration -->
+            <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-accent-soft rounded-xl border border-accent/20 -z-10 hidden lg:block" aria-hidden="true" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Valeurs -->
+    <section class="section-pad bg-bg" aria-labelledby="valeurs-titre">
+      <div class="container-site">
+        <div class="max-w-2xl mb-12">
+          <div class="flex items-center gap-3 mb-5">
+            <span class="accent-line" aria-hidden="true" />
+            <span class="section-label">L'approche</span>
+          </div>
+          <h2 id="valeurs-titre" class="font-display text-ink">
+            Comment je travaille.
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl">
+          {[
+            {
+              titre: "Qualité avant tout",
+              texte: "Aucun contenu médiocre ne sort de ma caméra. Si ce n'est pas bon, on recommence. Vous méritez du contenu qui vous représente vraiment.",
+            },
+            {
+              titre: "Discrétion sur le terrain",
+              texte: "Je m'adapte à votre rythme de travail. Mes tournages ne mobilisent pas votre équipe — votre activité continue normalement.",
+            },
+            {
+              titre: "Pas de langue de bois",
+              texte: "Je vous dis ce qui fonctionne, ce qui ne fonctionne pas, et pourquoi. Vous avez un interlocuteur direct, pas un commercial.",
+            },
+            {
+              titre: "Livraison rapide",
+              texte: "Vous n'attendez pas six semaines un devis ou deux mois les fichiers. Les délais sont clairs et tenus.",
+            },
+            {
+              titre: "Un seul interlocuteur",
+              texte: "Du brief à la livraison, c'est moi. Pas de déperdition d'information, pas de jeu de téléphone entre équipes.",
+            },
+            {
+              titre: "Résultats utilisables",
+              texte: "Chaque image et vidéo livrée a un usage concret immédiat. Je pense l'utilisation finale dès le tournage.",
+            },
+          ].map((val) => (
+            <div class="flex gap-4 p-5">
+              <div class="w-1 flex-shrink-0 bg-accent/30 rounded-full" aria-hidden="true" />
+              <div>
+                <h3 class="font-sans font-medium text-sm text-ink mb-1.5">{val.titre}</h3>
+                <p class="text-sm text-ink-2 leading-relaxed">{val.texte}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Vision future -->
+    <section class="section-pad-sm bg-surface" aria-labelledby="vision-titre">
+      <div class="container-site max-w-3xl">
+        <div class="flex items-center gap-3 mb-5">
+          <span class="accent-line" aria-hidden="true" />
+          <span class="section-label">Vision</span>
+        </div>
+        <h2 id="vision-titre" class="font-display text-xl font-medium text-ink mb-5">
+          Et ensuite ?
+        </h2>
+        <div class="flex flex-col gap-4 text-ink-2 leading-relaxed text-sm max-w-2xl">
+          <p>
+            Locamaster est aujourd'hui un studio visuel. Demain, il pourra aussi
+            intégrer des outils d'automatisation légère au service des artisans signataires :
+            gestion de réputation automatisée, rappels de publication, petits assistants
+            numériques. Des choses concrètes et utiles, pas de la technologie pour la technologie.
+          </p>
+          <p>
+            Ce n'est pas pour demain matin, mais c'est dans la direction.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <CTAFinale />
+  </main>
+  <Footer />
+</BaseLayout>

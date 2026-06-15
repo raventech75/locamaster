@@ -1,0 +1,101 @@
+---
+import type { Projet } from '../../data/projets';
+
+interface Props {
+  projet: Projet;
+  variant?: 'default' | 'large';
+}
+
+const { projet, variant = 'default' } = Astro.props;
+
+// Images placeholder par secteur — remplacer par les vraies images
+const placeholderImages: Record<string, string> = {
+  Plomberie: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=75&auto=format',
+  Cuisiniste: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=75&auto=format',
+  Menuiserie: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=75&auto=format',
+  Électricité: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&q=75&auto=format',
+  Rénovation: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=75&auto=format',
+};
+
+const imageSource = projet.imageCover.startsWith('/images/projets/')
+  ? placeholderImages[projet.secteur] || 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=75&auto=format'
+  : projet.imageCover;
+
+const badgeColors: Record<string, string> = {
+  photo: 'bg-blue-50 text-blue-700',
+  video: 'bg-purple-50 text-purple-700',
+  branding: 'bg-amber-50 text-amber-700',
+  pack: 'bg-emerald-50 text-emerald-700',
+};
+
+const badgeLabels: Record<string, string> = {
+  photo: 'Photo',
+  video: 'Vidéo',
+  branding: 'Branding',
+  pack: 'Pack complet',
+};
+---
+
+<a
+  href={`/realisations/${projet.slug}`}
+  class:list={[
+    'group block bg-white rounded-xl overflow-hidden border border-border hover:border-accent/30 hover:shadow-lg transition-all duration-300',
+    variant === 'large' && 'sm:col-span-2',
+  ]}
+  aria-label={`Voir le projet ${projet.titre}`}
+>
+  <!-- Image -->
+  <div class:list={['relative overflow-hidden', variant === 'large' ? 'aspect-[16/9]' : 'aspect-[4/3]']}>
+    <img
+      src={imageSource}
+      alt={`${projet.titre} — ${projet.client}`}
+      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      loading="lazy"
+      decoding="async"
+    />
+    <!-- Overlay au hover -->
+    <div class="absolute inset-0 bg-ink/0 group-hover:bg-ink/20 transition-colors duration-300" aria-hidden="true" />
+
+    <!-- Badge catégorie -->
+    <div class="absolute top-4 left-4">
+      <span class:list={['text-2xs font-sans font-medium px-2.5 py-1 rounded-full', badgeColors[projet.categorie] || 'bg-white text-ink']}>
+        {badgeLabels[projet.categorie] || projet.categorie}
+      </span>
+    </div>
+
+    <!-- Icône vidéo -->
+    {projet.videoUrl && (
+      <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
+          <svg class="w-5 h-5 text-ink ml-0.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </div>
+      </div>
+    )}
+  </div>
+
+  <!-- Contenu -->
+  <div class="p-5">
+    <div class="flex items-start justify-between gap-3 mb-2">
+      <h3 class="font-display font-medium text-base text-ink leading-snug group-hover:text-accent transition-colors duration-200">
+        {projet.titre}
+      </h3>
+    </div>
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-xs text-muted font-sans">{projet.client}</span>
+      <span class="text-muted/40" aria-hidden="true">·</span>
+      <span class="text-xs text-muted font-sans">{projet.secteur}</span>
+    </div>
+    <p class="text-sm text-ink-2 line-clamp-2 leading-relaxed">
+      {projet.description}
+    </p>
+    <!-- Lien -->
+    <div class="mt-4 flex items-center gap-1.5 text-accent text-xs font-sans font-medium group-hover:gap-2.5 transition-all duration-200">
+      Voir la réalisation
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+      </svg>
+    </div>
+  </div>
+</a>

@@ -1,0 +1,104 @@
+---
+import { faqItems } from '../data/faq';
+---
+
+<section class="section-pad bg-surface" aria-labelledby="faq-titre" id="faq">
+  <div class="container-site">
+    <div class="max-w-3xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <div class="flex items-center justify-center gap-3 mb-5">
+          <span class="accent-line" aria-hidden="true" />
+          <span class="section-label">Questions fréquentes</span>
+          <span class="accent-line" aria-hidden="true" />
+        </div>
+        <h2 id="faq-titre" class="font-display text-ink">
+          Ce que vous vous demandez<br />peut-être déjà.
+        </h2>
+      </div>
+
+      <!-- Accordéon -->
+      <div class="flex flex-col gap-3" role="list">
+        {faqItems.map((item, index) => (
+          <div
+            class="bg-white rounded-xl border border-border overflow-hidden"
+            role="listitem"
+          >
+            <button
+              class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left hover:bg-surface transition-colors duration-200"
+              aria-expanded="false"
+              aria-controls={`faq-answer-${index}`}
+              id={`faq-btn-${index}`}
+            >
+              <span class="font-sans font-medium text-sm text-ink leading-snug pr-2">
+                {item.question}
+              </span>
+              <span class="flex-shrink-0 w-6 h-6 rounded-full border border-border flex items-center justify-center transition-transform duration-200 faq-icon">
+                <svg class="w-3 h-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </button>
+            <div
+              id={`faq-answer-${index}`}
+              role="region"
+              aria-labelledby={`faq-btn-${index}`}
+              class="faq-answer hidden"
+            >
+              <div class="px-6 pb-5 text-sm text-ink-2 leading-relaxed border-t border-border pt-4">
+                {item.reponse}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <!-- CTA -->
+      <div class="mt-10 text-center">
+        <p class="text-sm text-muted mb-4">
+          Une question qui n'est pas là ?
+        </p>
+        <a href="/contact" class="btn-secondary inline-flex">
+          Poser ma question
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Accordéon FAQ — accessible, (re)lié à chaque chargement (View Transitions)
+  function initFaq() {
+  document.querySelectorAll('.faq-trigger').forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+      const answerId = trigger.getAttribute('aria-controls');
+      const answer = answerId ? document.getElementById(answerId) : null;
+      const icon = trigger.querySelector('.faq-icon');
+
+      // Fermer tous les autres
+      document.querySelectorAll('.faq-trigger').forEach((otherTrigger) => {
+        if (otherTrigger !== trigger) {
+          otherTrigger.setAttribute('aria-expanded', 'false');
+          const otherId = otherTrigger.getAttribute('aria-controls');
+          const otherAnswer = otherId ? document.getElementById(otherId) : null;
+          otherAnswer?.classList.add('hidden');
+          otherTrigger.querySelector('.faq-icon')?.classList.remove('rotate-180');
+        }
+      });
+
+      // Toggle courant
+      trigger.setAttribute('aria-expanded', String(!isOpen));
+      if (!isOpen) {
+        answer?.classList.remove('hidden');
+        icon?.classList.add('rotate-180');
+      } else {
+        answer?.classList.add('hidden');
+        icon?.classList.remove('rotate-180');
+      }
+    });
+  });
+  }
+
+  document.addEventListener('astro:page-load', initFaq);
+</script>

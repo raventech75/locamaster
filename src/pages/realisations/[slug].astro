@@ -1,0 +1,228 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import { projets, getProjetBySlug } from '../../data/projets';
+
+export function getStaticPaths() {
+  return projets.map((projet) => ({
+    params: { slug: projet.slug },
+    props: { projet },
+  }));
+}
+
+const { projet } = Astro.props;
+
+// Fallback images par secteur — utilisées si imageCover pointe vers /images/ (pas encore uploadées)
+const placeholderImages: Record<string, string> = {
+  Plomberie: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80&auto=format',
+  Cuisiniste: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=80&auto=format',
+  Menuiserie: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1200&q=80&auto=format',
+  Électricité: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=1200&q=80&auto=format',
+  Rénovation: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&q=80&auto=format',
+};
+
+// Même map pour les vignettes "projets connexes" (défini ici pour éviter les types TS dans les expressions JSX)
+const relatedPlaceholders: Record<string, string> = {
+  Plomberie: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=75&auto=format',
+  Cuisiniste: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=75&auto=format',
+  Menuiserie: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=75&auto=format',
+  Électricité: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&q=75&auto=format',
+  Rénovation: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=75&auto=format',
+};
+
+const coverImage = projet.imageCover.startsWith('/images/')
+  ? placeholderImages[projet.secteur] || 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1200&q=80&auto=format'
+  : projet.imageCover;
+
+// Projets connexes (même secteur ou même catégorie, hors courant)
+const related = projets
+  .filter((p) => p.slug !== projet.slug && (p.secteur === projet.secteur || p.categorie === projet.categorie))
+  .slice(0, 2);
+---
+
+<BaseLayout
+  title={projet.titre}
+  description={`${projet.description} Réalisation Locamaster — ${projet.secteur}, Île-de-France.`}
+  ogImage={coverImage}
+  canonical={`/realisations/${projet.slug}`}
+>
+  <Navigation variant="solid" />
+  <main id="main-content">
+
+    <!-- Cover image -->
+    <div class="relative h-72 md:h-96 lg:h-[520px] bg-ink overflow-hidden">
+      <img
+        src={coverImage}
+        alt={`Réalisation ${projet.titre} — ${projet.client}`}
+        class="w-full h-full object-cover opacity-75"
+        fetchpriority="high"
+        loading="eager"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" aria-hidden="true" />
+      <div class="absolute bottom-0 left-0 right-0 container-site pb-8">
+        <div class="flex items-center gap-2 mb-3">
+          <a href="/realisations" class="text-white/60 text-sm hover:text-white transition-colors duration-200 font-sans">
+            ← Réalisations
+          </a>
+        </div>
+        <h1 class="font-display text-white text-2xl md:text-3xl lg:text-4xl font-medium max-w-2xl">
+          {projet.titre}
+        </h1>
+      </div>
+    </div>
+
+    <!-- Contenu -->
+    <div class="section-pad-sm bg-bg">
+      <div class="container-site">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-14">
+
+          <!-- Colonne principale -->
+          <div class="lg:col-span-2 flex flex-col gap-10">
+
+            <!-- Description -->
+            <div>
+              <h2 class="font-display text-xl font-medium text-ink mb-4">Le contexte</h2>
+              <p class="text-ink-2 leading-relaxed">{projet.description}</p>
+            </div>
+
+            <!-- Besoin / Solution / Résultat -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {[
+                { label: 'Le besoin', content: projet.besoin },
+                { label: 'La solution', content: projet.solution },
+                { label: 'Le résultat', content: projet.resultat },
+              ].map((item) => (
+                <div class="card-surface">
+                  <span class="section-label block mb-3">{item.label}</span>
+                  <p class="text-sm text-ink-2 leading-relaxed">{item.content}</p>
+                </div>
+              ))}
+            </div>
+
+            <!-- Vidéo embed (si disponible) -->
+            {projet.videoUrl && (
+              <div>
+                <h2 class="font-display text-xl font-medium text-ink mb-5">La vidéo</h2>
+                <div class="relative aspect-video rounded-xl overflow-hidden bg-ink shadow-lg">
+                  <iframe
+                    src={projet.videoUrl}
+                    title={`Vidéo — ${projet.titre}`}
+                    class="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            )}
+
+            <!-- Galerie (si disponible) -->
+            {projet.galerie && projet.galerie.length > 0 && (
+              <div>
+                <h2 class="font-display text-xl font-medium text-ink mb-5">Galerie</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {projet.galerie.map((img, i) => (
+                    <div class="aspect-[4/3] rounded-lg overflow-hidden bg-surface">
+                      <img
+                        src={img.startsWith('/images/') ? coverImage : img}
+                        alt={`${projet.titre} — photo ${i + 1}`}
+                        class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <!-- Sidebar -->
+          <aside class="flex flex-col gap-6">
+
+            <!-- Infos client -->
+            <div class="card">
+              <h3 class="font-sans text-xs font-medium tracking-widest uppercase text-muted mb-4">À propos du projet</h3>
+              <dl class="flex flex-col gap-3">
+                {[
+                  { label: 'Client', value: projet.client },
+                  { label: 'Secteur', value: projet.secteur },
+                  { label: 'Pack', value: projet.pack || '—' },
+                  { label: 'Année', value: String(projet.dateAnnee) },
+                ].map((item) => (
+                  <div class="flex flex-col gap-0.5">
+                    <dt class="text-2xs font-sans font-medium text-muted uppercase tracking-wider">{item.label}</dt>
+                    <dd class="text-sm font-medium text-ink">{item.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+
+            <!-- Livrables -->
+            <div class="card">
+              <h3 class="font-sans text-xs font-medium tracking-widest uppercase text-muted mb-4">Livrables</h3>
+              <ul class="flex flex-col gap-2" role="list">
+                {projet.livrables.map((l) => (
+                  <li class="flex items-start gap-2.5 text-sm text-ink-2">
+                    <svg class="w-4 h-4 text-accent flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {l}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <!-- CTA sidebar -->
+            <div class="bg-ink rounded-xl p-6 text-center">
+              <p class="text-sm text-white/70 mb-4 leading-relaxed">
+                Vous avez un projet similaire ?
+              </p>
+              <a href="/contact" class="btn-primary w-full justify-center text-sm">
+                Demander un devis
+              </a>
+              <a href="/contact?offre=session-decouverte" class="mt-3 block text-center text-sm text-white/50 hover:text-accent transition-colors duration-200 font-sans">
+                Ou commencer par une session découverte — 190 € HT
+              </a>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projets connexes -->
+    {related.length > 0 && (
+      <section class="section-pad-sm bg-surface" aria-labelledby="related-titre">
+        <div class="container-site">
+          <h2 id="related-titre" class="font-display text-xl font-medium text-ink mb-7">
+            Autres réalisations
+          </h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {related.map((p) => (
+                <a
+                  href={`/realisations/${p.slug}`}
+                  class="group flex items-start gap-4 p-4 bg-white rounded-xl border border-border hover:border-accent/30 hover:shadow-md transition-all duration-300"
+                >
+                  <div class="w-20 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-surface">
+                    <img
+                      src={relatedPlaceholders[p.secteur] || relatedPlaceholders['Rénovation']}
+                      alt={p.titre}
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div>
+                    <h3 class="font-display font-medium text-sm text-ink leading-snug mb-1 group-hover:text-accent transition-colors">
+                      {p.titre}
+                    </h3>
+                    <p class="text-xs text-muted">{p.client} · {p.secteur}</p>
+                  </div>
+                </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+  </main>
+  <Footer />
+</BaseLayout>

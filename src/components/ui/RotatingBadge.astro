@@ -1,0 +1,47 @@
+---
+// Badge circulaire avec texte rotatif en boucle (décor "vivant", CSS pur).
+interface Props {
+  text?: string;
+  size?: number;
+  class?: string;
+}
+const {
+  text = 'SESSION DÉCOUVERTE · 190 € · SANS RISQUE · ',
+  size = 124,
+  class: className = '',
+} = Astro.props;
+const id = `badge-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div
+  class={`relative flex items-center justify-center ${className}`}
+  style={`width:${size}px;height:${size}px;`}
+  aria-hidden="true"
+>
+  <!-- Anneau de texte rotatif -->
+  <svg class="spin-badge absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+    <defs>
+      <path
+        id={id}
+        d="M 50,50 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"
+        fill="none"
+      />
+    </defs>
+    <text
+      class="font-sans font-bold uppercase fill-ink"
+      style="font-size:8.5px;letter-spacing:1.5px;"
+    >
+      <textPath href={`#${id}`}>{text}</textPath>
+    </text>
+  </svg>
+
+  <!-- Pastille centrale -->
+  <div
+    class="relative rounded-full bg-ink flex items-center justify-center"
+    style={`width:${size * 0.46}px;height:${size * 0.46}px;`}
+  >
+    <svg class="text-accent" width={size * 0.22} height={size * 0.22} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6z" />
+    </svg>
+  </div>
+</div>

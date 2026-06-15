@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout
+  title="Politique de confidentialité"
+  description="Politique de confidentialité et traitement des données de Locamaster."
+  canonical="/politique-confidentialite"
+  noIndex={true}
+>
+  <Navigation variant="solid" />
+  <main id="main-content">
+    <div class="section-pad bg-bg">
+      <div class="container-site max-w-2xl">
+        <h1 class="font-display text-ink mb-8">Politique de confidentialité</h1>
+        <div class="flex flex-col gap-8 text-sm text-ink-2 leading-relaxed">
+          <section>
+            <h2 class="font-display text-base font-medium text-ink mb-3">Données collectées</h2>
+            <p>
+              Le formulaire de contact collecte : nom, nom d'entreprise (optionnel), email, téléphone (optionnel),
+              type de besoin, budget estimatif (optionnel) et message. Ces données sont collectées avec votre consentement
+              explicite lors de l'envoi du formulaire.
+            </p>
+          </section>
+          <section>
+            <h2 class="font-display text-base font-medium text-ink mb-3">Finalité du traitement</h2>
+            <p>
+              Les données sont utilisées exclusivement pour répondre à vos demandes de devis et de contact.
+              Elles ne sont pas revendues ni partagées avec des tiers à des fins commerciales.
+            </p>
+          </section>
+          <section>
+            <h2 class="font-display text-base font-medium text-ink mb-3">Conservation</h2>
+            <p>
+              Les données de contact sont conservées pendant 3 ans à compter du dernier contact,
+              puis supprimées ou anonymisées.
+            </p>
+          </section>
+          <section>
+            <h2 class="font-display text-base font-medium text-ink mb-3">Vos droits (RGPD)</h2>
+            <p>
+              Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit
+              d'accès, de rectification, de suppression et de portabilité de vos données.
+              Pour exercer ces droits, contactez-nous à : <a href="mailto:contact@locamaster.fr" class="text-accent hover:text-accent-hover">contact@locamaster.fr</a>.
+            </p>
+          </section>
+          <section>
+            <h2 class="font-display text-base font-medium text-ink mb-3">Cookies</h2>
+            <p>
+              Ce site n'utilise pas de cookies de tracking ou publicitaires. Seuls des cookies techniques
+              strictement nécessaires au fonctionnement du site peuvent être déposés.
+            </p>
+          </section>
+        </div>
+        <div class="mt-10">
+          <a href="/" class="btn-secondary text-sm">← Retour à l'accueil</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

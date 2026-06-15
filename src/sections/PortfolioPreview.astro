@@ -1,0 +1,50 @@
+---
+import { getProjetsFeatures } from '../data/projets';
+import ProjectCard from '../components/portfolio/ProjectCard.astro';
+
+const projets = getProjetsFeatures();
+---
+
+<section class="section-pad bg-bg" aria-labelledby="portfolio-titre" id="realisations">
+  <div class="container-site">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10">
+      <div>
+        <div class="flex items-center gap-3 mb-5">
+          <span class="accent-line" aria-hidden="true" />
+          <span class="section-label">Réalisations</span>
+        </div>
+        <h2 id="portfolio-titre" class="font-display text-ink">
+          Des résultats concrets,<br />
+          pas des promesses.
+        </h2>
+      </div>
+      <a
+        href="/realisations"
+        class="btn-ghost flex-shrink-0 pb-1 border-b border-accent/40 hover:border-accent rounded-none px-0"
+      >
+        Voir toutes les réalisations
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </a>
+    </div>
+
+    <!-- Grille portfolio -->
+    <div class="portfolio-grid">
+      {projets.slice(0, 4).map((projet) => (
+        <ProjectCard projet={projet} />
+      ))}
+    </div>
+
+    <!-- Note -->
+    <div class="mt-10 text-center">
+      <p class="text-sm text-muted mb-4">
+        Portfolio en cours de construction — chaque nouveau projet est ajouté en temps réel.
+      </p>
+      <a href="/realisations" class="btn-primary">
+        Voir toutes les réalisations
+      </a>
+    </div>
+  </div>
+</section>
