@@ -24,7 +24,6 @@ const REVEAL_SELECTOR = [
 
 // Singletons (persistent entre navigations View Transitions)
 let lenis: Lenis | null = null;
-let cursorReady = false;
 let curtainReady = false;
 
 /* ----------------------------------------------------------------
@@ -36,41 +35,6 @@ function setupLenisOnce() {
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => lenis!.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
-}
-
-/* ----------------------------------------------------------------
-   Curseur custom — anneau qui suit avec inertie + dot, grossit au survol
-   ---------------------------------------------------------------- */
-function setupCursorOnce() {
-  if (cursorReady || !finePointer || reduce) return;
-  cursorReady = true;
-
-  const ring = document.createElement('div');
-  ring.id = 'luxe-cursor';
-  const dot = document.createElement('div');
-  dot.id = 'luxe-dot';
-  document.documentElement.append(ring, dot);
-
-  let rx = 0, ry = 0, mx = 0, my = 0;
-  window.addEventListener('mousemove', (e) => {
-    mx = e.clientX;
-    my = e.clientY;
-    gsap.to(dot, { x: mx, y: my, duration: 0.12, ease: 'power2.out' });
-  });
-  gsap.ticker.add(() => {
-    rx += (mx - rx) * 0.16;
-    ry += (my - ry) * 0.16;
-    gsap.set(ring, { x: rx, y: ry });
-  });
-
-  // Survol des éléments interactifs (délégation → survit aux swaps de page)
-  const interactive = 'a, button, [data-magnetic], [data-cursor]';
-  document.addEventListener('mouseover', (e) => {
-    if ((e.target as Element).closest?.(interactive)) ring.classList.add('is-hover');
-  });
-  document.addEventListener('mouseout', (e) => {
-    if ((e.target as Element).closest?.(interactive)) ring.classList.remove('is-hover');
-  });
 }
 
 /* ----------------------------------------------------------------
@@ -132,7 +96,6 @@ function initPage() {
 
   gsap.registerPlugin(ScrollTrigger);
   setupLenisOnce();
-  setupCursorOnce();
   setupCurtainOnce();
   runLoaderOnce();
 

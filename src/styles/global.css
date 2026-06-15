@@ -288,52 +288,6 @@ html.lenis body {
 }
 
 /* ----------------------------------------------------------------
-   Curseur custom (desktop / pointeur fin uniquement)
-   Le curseur natif reste actif (accessibilité) — ceci s'ajoute par-dessus.
-   ---------------------------------------------------------------- */
-#luxe-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 34px;
-  height: 34px;
-  margin: -17px 0 0 -17px;
-  border: 2px solid #15120D;
-  border-radius: 9999px;
-  pointer-events: none;
-  z-index: 9999;
-  will-change: transform;
-  transition: width 0.25s ease, height 0.25s ease, margin 0.25s ease,
-    background-color 0.25s ease, border-color 0.25s ease;
-}
-#luxe-cursor.is-hover {
-  width: 58px;
-  height: 58px;
-  margin: -29px 0 0 -29px;
-  background-color: rgba(242, 176, 30, 0.18);
-  border-color: #F2B01E;
-}
-#luxe-dot {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  background-color: #15120D;
-  border-radius: 9999px;
-  pointer-events: none;
-  z-index: 9999;
-  will-change: transform;
-}
-@media (pointer: coarse) {
-  #luxe-cursor,
-  #luxe-dot {
-    display: none;
-  }
-}
-
-/* ----------------------------------------------------------------
    Anti-FOUC des animations GSAP
    .has-luxe n'est posé sur <html> qu'en JS et hors prefers-reduced-motion.
    Si JS désactivé / reduced-motion : le contenu reste visible.

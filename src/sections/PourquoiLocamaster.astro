@@ -1,9 +1,14 @@
 ---
 // Section différenciation — arguments clés Locamaster
+import ShaderBackground from '../components/ShaderBackground.astro';
 ---
 
-<section class="section-pad bg-ink text-white" aria-labelledby="pourquoi-titre" id="pourquoi">
-  <div class="container-site">
+<section class="section-pad bg-ink text-white relative overflow-hidden" aria-labelledby="pourquoi-titre" id="pourquoi">
+  <!-- Fond WebGL animé (lignes miel) + voile pour la lisibilité du texte -->
+  <ShaderBackground opacity={0.55} />
+  <div class="absolute inset-0 bg-ink/55" aria-hidden="true"></div>
+
+  <div class="container-site relative z-10">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
       <!-- Gauche — texte principal -->

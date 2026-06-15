@@ -1,0 +1,161 @@
+---
+// Fond animé WebGL (Three.js) — lignes concentriques "miel" sur fond ink.
+// Le vrai effet "vidéo" qui bouge. Vanilla (pas de React).
+// - lazy : Three.js n'est importé que si la section approche du viewport
+// - perf : l'animation se met en pause quand la section sort de l'écran
+// - accessibilité : désactivé en prefers-reduced-motion (fond statique)
+interface Props {
+  class?: string;
+  opacity?: number;
+}
+const { class: className = '', opacity = 0.9 } = Astro.props;
+---
+
+<div
+  class:list={['shader-bg absolute inset-0 overflow-hidden bg-ink', className]}
+  data-shader
+  style={`--shader-opacity:${opacity}`}
+  aria-hidden="true"
+>
+  <canvas data-shader-canvas class="block w-full h-full"></canvas>
+</div>
+
+<style>
+  .shader-bg canvas {
+    opacity: var(--shader-opacity, 0.9);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .shader-bg canvas {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import type * as THREE_NS from 'three';
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const FRAGMENT = `
+    precision highp float;
+    uniform vec2 resolution;
+    uniform float time;
+
+    void main(void) {
+      vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+      float t = time * 0.04;
+      float lineWidth = 0.0017;
+
+      float glow = 0.0;
+      for (int i = 0; i < 5; i++) {
+        glow += lineWidth * float(i * i) /
+          abs(fract(t + float(i) * 0.012) * 5.0 - length(uv) + mod(uv.x + uv.y, 0.22));
+      }
+
+      // Teinte miel #F2B01E sur fond ink #15120D
+      vec3 accent = vec3(0.949, 0.690, 0.118);
+      vec3 base = vec3(0.082, 0.071, 0.051);
+      vec3 col = base + accent * glow;
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  const VERTEX = `
+    void main() {
+      gl_Position = vec4(position, 1.0);
+    }
+  `;
+
+  async function initOne(wrap: HTMLElement) {
+    if (wrap.dataset.shaderReady === '1' || reduce) return;
+    wrap.dataset.shaderReady = '1';
+
+    const canvas = wrap.querySelector<HTMLCanvasElement>('[data-shader-canvas]');
+    if (!canvas) return;
+
+    // Import paresseux de Three.js (n'alourdit pas le bundle initial)
+    const THREE = (await import('three')) as typeof THREE_NS;
+
+    const camera = new THREE.Camera();
+    camera.position.z = 1;
+    const scene = new THREE.Scene();
+    const geometry = new THREE.PlaneGeometry(2, 2);
+    const uniforms = {
+      time: { value: 1.0 },
+      resolution: { value: new THREE.Vector2() },
+    };
+    const material = new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader: VERTEX,
+      fragmentShader: FRAGMENT,
+    });
+    scene.add(new THREE.Mesh(geometry, material));
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const resize = () => {
+      const w = wrap.clientWidth;
+      const h = wrap.clientHeight;
+      renderer.setSize(w, h, false);
+      uniforms.resolution.value.x = w * Math.min(window.devicePixelRatio, 2);
+      uniforms.resolution.value.y = h * Math.min(window.devicePixelRatio, 2);
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(wrap);
+
+    let raf = 0;
+    let running = false;
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      uniforms.time.value += 0.05;
+      renderer.render(scene, camera);
+    };
+    const start = () => {
+      if (!running) { running = true; loop(); }
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    // Anime seulement quand visible (économie GPU/batterie)
+    const vis = new IntersectionObserver(
+      ([entry]) => (entry.isIntersecting ? start() : stop()),
+      { threshold: 0 }
+    );
+    vis.observe(wrap);
+
+    // Nettoyage avant une navigation View Transitions
+    const cleanup = () => {
+      stop();
+      ro.disconnect();
+      vis.disconnect();
+      renderer.dispose();
+      geometry.dispose();
+      material.dispose();
+      document.removeEventListener('astro:before-swap', cleanup);
+    };
+    document.addEventListener('astro:before-swap', cleanup);
+  }
+
+  function initAll() {
+    const wraps = Array.from(document.querySelectorAll<HTMLElement>('[data-shader]'));
+    // N'initialise que lorsque la section approche, via IntersectionObserver
+    const pre = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            initOne(e.target as HTMLElement);
+            pre.unobserve(e.target);
+          }
+        });
+      },
+      { rootMargin: '300px' }
+    );
+    wraps.forEach((w) => pre.observe(w));
+  }
+
+  document.addEventListener('astro:page-load', initAll);
+</script>
