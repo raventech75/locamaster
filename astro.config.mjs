@@ -13,7 +13,8 @@ export default defineConfig({
       applyBaseStyles: false, // on gère nos propres base styles
     }),
   ],
-  site: 'https://locamaster.fr',
+  // Domaine canonique = www (c'est lui que sert Vercel ; l'apex y redirige).
+  site: 'https://www.locamaster.fr',
   vite: {
     optimizeDeps: {
       exclude: [],
