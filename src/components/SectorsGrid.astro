@@ -1,0 +1,157 @@
+---
+// Grille « Pour qui » — métiers accompagnés, avec un shimmer pixel au survol
+// (canvas animé, couleurs miel). Version honnête de l'effet "pixel logo grid"
+// fourni en React : ici ce sont de VRAIS secteurs cibles, pas de faux logos
+// de grands comptes. Réécrit en vanilla (aucune dépendance React).
+const sectors: { name: string; icon: string }[] = [
+  { name: 'Plomberie', icon: 'M14 7l-1.5-1.5a3 3 0 00-4 4L4 13.5V18h4.5l4-4a3 3 0 004-4L14 7z' },
+  { name: 'Électricité', icon: 'M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5z' },
+  { name: 'Menuiserie', icon: 'M3 7l4-4 3 3-4 4-3-3zm4 0l10 10 3-3L10 4 7 7z' },
+  { name: 'Cuisiniste', icon: 'M4 4h16v6a4 4 0 01-4 4H8a4 4 0 01-4-4V4zm4 14h8v2H8z' },
+  { name: 'Rénovation', icon: 'M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6' },
+  { name: 'Maçonnerie', icon: 'M3 6h6v4H3V6zm8 0h10v4H11V6zM3 14h10v4H3v-4zm12 0h6v4h-6v-4z' },
+  { name: 'Couverture', icon: 'M3 12l9-7 9 7M5 11v8h14v-8' },
+  { name: 'Indépendants', icon: 'M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0' },
+];
+---
+
+<section class="section-pad-sm bg-bg" aria-labelledby="secteurs-titre">
+  <div class="container-site">
+    <div class="max-w-2xl mb-10">
+      <div class="flex items-center gap-3 mb-5">
+        <span class="accent-line" aria-hidden="true" />
+        <span class="section-label">Pour qui</span>
+      </div>
+      <h2 id="secteurs-titre" class="font-display text-ink mb-3">
+        Les métiers que j'accompagne.
+      </h2>
+      <p class="text-lead">
+        Artisans et entreprises locales d'Île-de-France. Survolez votre métier.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-ink border-2 border-ink rounded-2xl overflow-hidden">
+      {sectors.map((s) => (
+        <div class="sector-tile group relative isolate flex flex-col items-center justify-center gap-3 bg-bg aspect-[5/4] cursor-default select-none transition-colors duration-300 hover:bg-white">
+          <div class="pixel-wrap absolute inset-0 overflow-hidden" data-pixel-canvas data-colors="#F2B01E,#DC9C0A,#FBEBC4" aria-hidden="true">
+            <canvas class="block"></canvas>
+          </div>
+          <svg class="relative z-10 w-7 h-7 text-ink/70 group-hover:text-accent transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d={s.icon} />
+          </svg>
+          <span class="relative z-10 font-sans font-semibold text-sm text-ink">{s.name}</span>
+        </div>
+      ))}
+    </div>
+
+    <p class="text-sm text-muted mt-6">
+      Votre métier n'est pas listé ? Il y a de bonnes chances que je puisse intervenir —
+      <a href="/contact" class="text-accent hover:text-accent-hover font-medium transition-colors">parlons-en</a>.
+    </p>
+  </div>
+</section>
+
+<script>
+  // ---- Pixel shimmer (vanilla, porté depuis un composant React fourni) ----
+  type Pixel = {
+    x: number; y: number; color: string; size: number; sizeStep: number;
+    minSize: number; maxSizeInt: number; maxSize: number; speed: number;
+    delay: number; counter: number; counterStep: number;
+    isIdle: boolean; isReverse: boolean; isShimmer: boolean;
+  };
+
+  function makePixel(canvas: HTMLCanvasElement, x: number, y: number, color: string, baseSpeed: number, delay: number): Pixel {
+    const rand = (a: number, b: number) => Math.random() * (b - a) + a;
+    return {
+      x, y, color, size: 0, sizeStep: Math.random() * 0.4, minSize: 0.5,
+      maxSizeInt: 2, maxSize: rand(0.5, 2), speed: rand(0.1, 0.9) * baseSpeed,
+      delay, counter: 0, counterStep: Math.random() * 4 + (canvas.width + canvas.height) * 0.01,
+      isIdle: false, isReverse: false, isShimmer: false,
+    };
+  }
+
+  function setupPixelTile(wrap: HTMLElement) {
+    if (wrap.dataset.pixelReady === '1') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    wrap.dataset.pixelReady = '1';
+
+    const canvas = wrap.querySelector('canvas');
+    const ctx = canvas?.getContext('2d');
+    const card = wrap.parentElement;
+    if (!canvas || !ctx || !card) return;
+
+    const colors = (wrap.dataset.colors || '#F2B01E').split(',');
+    const gap = 6;
+    let pixels: Pixel[] = [];
+    let raf = 0;
+
+    const build = () => {
+      const { width, height } = wrap.getBoundingClientRect();
+      const w = Math.floor(width), h = Math.floor(height);
+      if (w === 0 || h === 0) return;
+      canvas.width = w; canvas.height = h;
+      const baseSpeed = 0.03;
+      pixels = [];
+      for (let x = 0; x < w; x += gap) {
+        for (let y = 0; y < h; y += gap) {
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          const dx = x - w / 2, dy = y - h / 2;
+          pixels.push(makePixel(canvas, x, y, color, baseSpeed, Math.sqrt(dx * dx + dy * dy)));
+        }
+      }
+    };
+    build();
+    const ro = new ResizeObserver(build);
+    ro.observe(wrap);
+
+    const draw = (p: Pixel) => {
+      const o = p.maxSizeInt * 0.5 - p.size * 0.5;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x + o, p.y + o, p.size, p.size);
+    };
+    const shimmer = (p: Pixel) => {
+      if (p.size >= p.maxSize) p.isReverse = true;
+      else if (p.size <= p.minSize) p.isReverse = false;
+      p.size += p.isReverse ? -p.speed : p.speed;
+    };
+    const appear = (p: Pixel) => {
+      p.isIdle = false;
+      if (p.counter <= p.delay) { p.counter += p.counterStep; return; }
+      if (p.size >= p.maxSize) p.isShimmer = true;
+      if (p.isShimmer) shimmer(p); else p.size += p.sizeStep;
+      draw(p);
+    };
+    const disappear = (p: Pixel) => {
+      p.isShimmer = false; p.counter = 0;
+      if (p.size <= 0) { p.isIdle = true; return; }
+      p.size -= 0.1; draw(p);
+    };
+
+    const loop = (mode: 'appear' | 'disappear') => {
+      cancelAnimationFrame(raf);
+      const run = () => {
+        raf = requestAnimationFrame(run);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const p of pixels) (mode === 'appear' ? appear : disappear)(p);
+        if (mode === 'disappear' && pixels.every((p) => p.isIdle)) cancelAnimationFrame(raf);
+      };
+      raf = requestAnimationFrame(run);
+    };
+
+    const onEnter = () => loop('appear');
+    const onLeave = () => loop('disappear');
+    card.addEventListener('mouseenter', onEnter);
+    card.addEventListener('mouseleave', onLeave);
+
+    document.addEventListener('astro:before-swap', () => {
+      cancelAnimationFrame(raf); ro.disconnect();
+      card.removeEventListener('mouseenter', onEnter);
+      card.removeEventListener('mouseleave', onLeave);
+    }, { once: true });
+  }
+
+  function initPixels() {
+    document.querySelectorAll<HTMLElement>('[data-pixel-canvas]').forEach(setupPixelTile);
+  }
+  document.addEventListener('astro:page-load', initPixels);
+</script>
