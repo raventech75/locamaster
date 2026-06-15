@@ -1,0 +1,91 @@
+---
+// Formes flottantes d'ambiance — pills floues qui entrent en planant puis
+// oscillent en boucle. CSS pur (aucune dépendance JS), tintées miel/ink.
+// Entrée : chute + rotation (fill both) ; puis flottement infini.
+// Désactivé proprement en prefers-reduced-motion.
+interface Shape {
+  w: number;
+  h: number;
+  rotate: number;
+  delay: number;
+  tone: 'accent' | 'ink';
+  pos: string; // classes de position Tailwind
+}
+
+const shapes: Shape[] = [
+  { w: 520, h: 130, rotate: 12, delay: 0.25, tone: 'accent', pos: 'left-[-8%] top-[12%]' },
+  { w: 420, h: 110, rotate: -15, delay: 0.45, tone: 'ink', pos: 'right-[-6%] top-[62%]' },
+  { w: 280, h: 80, rotate: -8, delay: 0.35, tone: 'accent', pos: 'left-[3%] bottom-[6%]' },
+  { w: 200, h: 60, rotate: 20, delay: 0.6, tone: 'ink', pos: 'right-[14%] top-[8%]' },
+  { w: 150, h: 46, rotate: -22, delay: 0.7, tone: 'accent', pos: 'left-[24%] top-[4%]' },
+];
+---
+
+<div class="floating-shapes absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+  {shapes.map((s) => (
+    <div
+      class:list={['shape absolute', s.pos]}
+      style={`--r:${s.rotate}deg; --delay:${s.delay}s; width:${s.w}px; height:${s.h}px;`}
+    >
+      <div class="shape-float">
+        <div class:list={['shape-inner', s.tone === 'accent' ? 'shape-accent' : 'shape-ink']}></div>
+      </div>
+    </div>
+  ))}
+</div>
+
+<style>
+  .shape {
+    /* entrée unique : chute + rotation, état final conservé (both) */
+    animation: shape-in 2.4s cubic-bezier(0.23, 0.86, 0.39, 0.96) var(--delay) both;
+    will-change: transform, opacity;
+  }
+  .shape-float {
+    width: 100%;
+    height: 100%;
+    /* flottement perpétuel, démarre après l'entrée */
+    animation: shape-float 12s ease-in-out 2.4s infinite;
+  }
+  .shape-inner {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    backdrop-filter: blur(2px);
+  }
+  .shape-accent {
+    background: linear-gradient(to right, rgba(242, 176, 30, 0.22), transparent);
+    border: 1px solid rgba(242, 176, 30, 0.25);
+    box-shadow: 0 8px 32px 0 rgba(242, 176, 30, 0.12);
+  }
+  .shape-ink {
+    background: linear-gradient(to right, rgba(21, 18, 13, 0.10), transparent);
+    border: 1px solid rgba(21, 18, 13, 0.12);
+    box-shadow: 0 8px 32px 0 rgba(21, 18, 13, 0.06);
+  }
+
+  @keyframes shape-in {
+    0% {
+      opacity: 0;
+      transform: translateY(-140px) rotate(calc(var(--r) - 15deg));
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) rotate(var(--r));
+    }
+  }
+  @keyframes shape-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(15px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shape {
+      animation: none;
+      opacity: 1;
+      transform: rotate(var(--r));
+    }
+    .shape-float {
+      animation: none;
+    }
+  }
+</style>

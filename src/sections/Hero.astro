@@ -1,6 +1,7 @@
 ---
 // Hero — statement éditorial bold, fond clair, accent miel
 // Image de contexte artisan à droite, typographie oversized à gauche
+import FloatingShapes from '../components/FloatingShapes.astro';
 ---
 
 <section
@@ -11,6 +12,9 @@
   <!-- Grain / texture de fond subtile -->
   <div class="absolute inset-0 pointer-events-none opacity-[0.4]" aria-hidden="true"
        style="background-image: radial-gradient(circle at 1px 1px, rgba(21,18,13,0.06) 1px, transparent 0); background-size: 28px 28px;"></div>
+
+  <!-- Formes flottantes d'ambiance (derrière le contenu) -->
+  <FloatingShapes />
 
   <div class="container-site relative pt-28 md:pt-32 lg:pt-36 pb-0">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-end">
