@@ -1,5 +1,3 @@
-/* asset-rev: 2 — force un nouveau hash de fichier pour invalider la
-   redirection 308 mise en cache par Chrome (voir vercel.json / domaine www) */
 /* ----------------------------------------------------------------
    Fonts — @import doit précéder toutes les autres déclarations CSS
    Bricolage Grotesque (display éditorial) + Inter (texte)
@@ -333,3 +331,7 @@ html.lenis body {
     display: none;
   }
 }
+
+/* Révision d'asset — change le hash du bundle CSS pour invalider une
+   redirection 308 mise en cache (Chrome). Incrémenter si besoin. */
+:root { --lm-asset-rev: 2; }
