@@ -169,7 +169,37 @@ function initPage() {
     });
   });
 
-  // 5. Boutons magnétiques
+  // 5. Galerie inclinée au scroll (tuiles qui basculent en entrant/sortant)
+  const tiles = document.querySelectorAll<HTMLElement>('[data-tilt-tile]');
+  tiles.forEach((tile) => {
+    const mover = tile.querySelector<HTMLElement>('.tilt-mover');
+    const img = tile.querySelector<HTMLElement>('.tilt-img');
+    if (!mover || !img) return;
+    const sign = tile.dataset.side === 'L' ? -1 : 1;
+
+    const tl = gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: { trigger: tile, start: 'top bottom', end: 'bottom top', scrub: true },
+    });
+    // Entrée (0 → 0.5) : la tuile monte, inclinée vers l'avant et floue
+    tl.fromTo(mover,
+      { yPercent: 30, z: 220, rotateX: 55, rotate: -sign * 5, skewX: sign * 16, xPercent: sign * 28,
+        '--tilt-blur': '8px', '--tilt-bright': 0.2, '--tilt-contrast': 3 },
+      { yPercent: 0, z: 0, rotateX: 0, rotate: 0, skewX: 0, xPercent: 0,
+        '--tilt-blur': '0px', '--tilt-bright': 1, '--tilt-contrast': 1 }
+    );
+    // Sortie (0.5 → 1) : la tuile bascule vers l'arrière et redevient floue
+    tl.to(mover,
+      { yPercent: -30, z: 220, rotateX: -55, rotate: sign * 5, skewX: -sign * 16, xPercent: sign * 28,
+        '--tilt-blur': '8px', '--tilt-bright': 0.2, '--tilt-contrast': 3 }
+    );
+    // Léger parallaxe interne de l'image
+    gsap.fromTo(img, { scaleY: 1.6 },
+      { scaleY: 1.6, scrollTrigger: { trigger: tile, start: 'top bottom', end: 'bottom top', scrub: true },
+        keyframes: { '0%': { scaleY: 1.6 }, '50%': { scaleY: 1 }, '100%': { scaleY: 1.6 } } });
+  });
+
+  // 6. Boutons magnétiques
   if (finePointer) {
     document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => {
       const strength = 0.35;

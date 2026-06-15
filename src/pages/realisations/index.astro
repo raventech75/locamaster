@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Navigation from '../../components/Navigation.astro';
 import Footer from '../../components/Footer.astro';
 import ProjectCard from '../../components/portfolio/ProjectCard.astro';
+import ScrollTiltGallery from '../../components/ScrollTiltGallery.astro';
 import { projets } from '../../data/projets';
 
 const categories = [
@@ -38,6 +39,11 @@ const categories = [
           et un vrai résultat. Portfolio en construction — mis à jour régulièrement.
         </p>
       </div>
+    </div>
+
+    <!-- Galerie éditoriale inclinée au scroll -->
+    <div class="bg-ink">
+      <ScrollTiltGallery />
     </div>
 
     <!-- Filtres -->
