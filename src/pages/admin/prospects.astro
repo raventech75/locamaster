@@ -1035,7 +1035,7 @@ function renderKanban(data) {
               ${KANBAN_COLS.filter(c => c.key !== col.key).slice(0,2).map(c =>
                 `<button onclick="updateStatut('${p.id}','${c.key}')" style="font-size:10px;padding:3px 7px;border:1px solid #e7e5e4;background:#fff;border-radius:5px;cursor:pointer" title="→ ${c.label}">→ ${c.label}</button>`
               ).join('')}
-              <button onclick="openCallModal('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.notes||')}')" style="font-size:10px;padding:3px 7px;border:1px solid #e7e5e4;background:#fff;border-radius:5px;cursor:pointer">📞</button>
+              <button onclick="openCallModal('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.notes||'')}')" style="font-size:10px;padding:3px 7px;border:1px solid #e7e5e4;background:#fff;border-radius:5px;cursor:pointer">📞</button>
             </div>
           </div>`).join('')}
       </div>
