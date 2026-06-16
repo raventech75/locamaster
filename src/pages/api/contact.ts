@@ -84,8 +84,10 @@ export const POST: APIRoute = async ({ request }) => {
     // --------------------------------------------------------
     // 1. SUPABASE — Stockage du lead
     // process.env = runtime Vercel ; import.meta.env = build-time Vite (fallback dev)
-    const getEnv = (k: string): string | undefined =>
-      process.env[k] ?? (import.meta.env as Record<string, string | undefined>)[k];
+    const getEnv = (k: string): string | undefined => {
+      try { return process.env[k] ?? (import.meta.env as Record<string, string | undefined>)[k]; }
+      catch { return process.env[k]; }
+    };
 
     const SUPABASE_URL = getEnv('PUBLIC_SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = getEnv('SUPABASE_SERVICE_ROLE_KEY');
@@ -172,7 +174,7 @@ export const POST: APIRoute = async ({ request }) => {
       }
     );
   } catch (err) {
-    console.error('[contact API] Erreur inattendue :', err);
+    console.error('[contact API] Erreur inattendue :', err instanceof Error ? err.message : err, err instanceof Error ? err.stack : '');
     return new Response(
       JSON.stringify({ error: 'Une erreur inattendue s\'est produite.' }),
       {
