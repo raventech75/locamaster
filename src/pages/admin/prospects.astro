@@ -145,8 +145,17 @@ if (!adminToken || token !== adminToken) {
     .progress-bar { height: 6px; background: #e7e5e4; border-radius: 3px; margin-top: 12px; overflow: hidden; display: none; }
     .progress-bar-fill { height: 100%; background: #f59e0b; width: 0%; transition: width .3s; }
 
-    .notes-cell { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #78716c; font-size: 12px; }
+    .notes-cell { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #78716c; font-size: 12px; }
     .actions { display: flex; gap: 4px; flex-wrap: wrap; }
+    .call-badge { display: inline-flex; align-items: center; gap: 3px; background: #fef3c7; color: #92400e; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 10px; margin-left: 4px; }
+    .btn-call { background: #fef9c3; color: #713f12; border: 1px solid #fde68a; }
+    /* Call modal */
+    .call-modal { max-width: 380px; }
+    .call-results { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+    .call-opt { display: flex; align-items: center; gap-8px; padding: 10px 12px; border: 2px solid #e7e5e4; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all .15s; gap: 8px; }
+    .call-opt:hover { border-color: #f59e0b; background: #fffbeb; }
+    .call-opt.selected { border-color: #f59e0b; background: #fef3c7; }
+    .call-opt input { display: none; }
 
     .toast { position: fixed; bottom: 20px; right: 20px; background: #1c1917; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 300; transform: translateY(20px); opacity: 0; transition: all .25s; pointer-events: none; max-width: 320px; }
     .toast.show { transform: translateY(0); opacity: 1; }
@@ -324,6 +333,51 @@ if (!adminToken || token !== adminToken) {
   </div>
 
 </main>
+
+<!-- Modal log appel -->
+<div class="modal-overlay" id="call-modal">
+  <div class="modal call-modal">
+    <h2>📞 Logger un appel</h2>
+    <p id="call-prospect-name" style="font-size:13px;color:#78716c;margin-bottom:4px"></p>
+    <input type="hidden" id="call-prospect-id" />
+    <input type="hidden" id="call-prospect-notes" />
+    <p style="font-size:12px;font-weight:600;color:#57534e;margin-bottom:8px;margin-top:12px">Résultat de l'appel</p>
+    <div class="call-results">
+      <label class="call-opt" onclick="selectCallResult(this, 'pas_repondu')">
+        <input type="radio" name="call-result" value="pas_repondu" />
+        📵 Pas répondu
+      </label>
+      <label class="call-opt" onclick="selectCallResult(this, 'messagerie')">
+        <input type="radio" name="call-result" value="messagerie" />
+        📬 Messagerie
+      </label>
+      <label class="call-opt" onclick="selectCallResult(this, 'interesse')">
+        <input type="radio" name="call-result" value="interesse" />
+        ✅ Intéressé
+      </label>
+      <label class="call-opt" onclick="selectCallResult(this, 'pas_interesse')">
+        <input type="radio" name="call-result" value="pas_interesse" />
+        ❌ Pas intéressé
+      </label>
+      <label class="call-opt" onclick="selectCallResult(this, 'rappeler')">
+        <input type="radio" name="call-result" value="rappeler" />
+        🔁 À rappeler
+      </label>
+      <label class="call-opt" onclick="selectCallResult(this, 'rdv_pris')">
+        <input type="radio" name="call-result" value="rdv_pris" />
+        🎯 RDV pris !
+      </label>
+    </div>
+    <div>
+      <label for="call-note" style="font-size:12px;font-weight:600;color:#57534e">Note rapide (optionnel)</label>
+      <input type="text" id="call-note" placeholder="Ex: rappeler jeudi matin, intéressé par la vidéo…" style="margin-top:4px" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeCallModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveCall()">Enregistrer</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal ajout / édition -->
 <div class="modal-overlay" id="modal">
@@ -510,7 +564,10 @@ function renderTable(data) {
     return `
     <tr>
       <td>
-        <div style="font-weight:600;font-size:13px">${esc(p.nom)}</div>
+        <div style="font-weight:600;font-size:13px">
+          ${esc(p.nom)}
+          ${countCalls(p.notes) > 0 ? `<span class="call-badge">📞 ${countCalls(p.notes)}</span>` : ''}
+        </div>
         ${p.entreprise ? `<div style="color:#78716c;font-size:12px">${esc(p.entreprise)}</div>` : ''}
       </td>
       <td>${p.secteur ? (SECTEUR_LABELS[p.secteur] || p.secteur) : '<span style="color:#a8a29e">—</span>'}</td>
@@ -529,6 +586,7 @@ function renderTable(data) {
       <td>
         <div class="actions">
           ${callBtn}${waBtn}${emailBtn}
+          <button class="btn btn-sm btn-call" onclick="openCallModal('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.notes||'')}')">📞</button>
           <button class="btn btn-sm btn-ghost" onclick="openEdit('${p.id}')">✏</button>
           <button class="btn btn-sm btn-danger" onclick="deleteProspect('${p.id}')">✕</button>
         </div>
@@ -801,6 +859,80 @@ function showToast(msg, type = '') {
 
 document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 document.getElementById('import-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeImportModal(); });
+document.getElementById('call-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCallModal(); });
+
+// ── LOG APPEL ─────────────────────────────────────────
+const CALL_RESULTS = {
+  pas_repondu: 'Pas répondu',
+  messagerie: 'Messagerie',
+  interesse: 'Intéressé',
+  pas_interesse: 'Pas intéressé',
+  rappeler: 'À rappeler',
+  rdv_pris: '🎯 RDV pris',
+};
+const CALL_STATUT = {
+  interesse: 'interesse',
+  rdv_pris: 'en_cours',
+  pas_interesse: 'perdu',
+};
+
+let callSelectedResult = null;
+
+function countCalls(notes) {
+  if (!notes) return 0;
+  return (notes.match(/📞 Appel/g) || []).length;
+}
+
+function openCallModal(id, nom, entreprise, notes) {
+  document.getElementById('call-prospect-id').value = id;
+  document.getElementById('call-prospect-notes').value = notes;
+  document.getElementById('call-prospect-name').textContent = entreprise ? `${nom} · ${entreprise}` : nom;
+  document.getElementById('call-note').value = '';
+  callSelectedResult = null;
+  document.querySelectorAll('.call-opt').forEach(el => el.classList.remove('selected'));
+  document.getElementById('call-modal').classList.add('open');
+}
+
+function closeCallModal() {
+  document.getElementById('call-modal').classList.remove('open');
+}
+
+function selectCallResult(el, value) {
+  document.querySelectorAll('.call-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  callSelectedResult = value;
+}
+
+async function saveCall() {
+  if (!callSelectedResult) { showToast('Sélectionne un résultat', 'error'); return; }
+  const id = document.getElementById('call-prospect-id').value;
+  const existingNotes = document.getElementById('call-prospect-notes').value;
+  const extraNote = document.getElementById('call-note').value.trim();
+  const date = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+  const label = CALL_RESULTS[callSelectedResult];
+  const callEntry = `📞 Appel ${date} · ${label}${extraNote ? ` · ${extraNote}` : ''}`;
+  const newNotes = existingNotes ? existingNotes + '\n' + callEntry : callEntry;
+
+  const updates = { id, notes: newNotes };
+  if (CALL_STATUT[callSelectedResult]) updates.statut = CALL_STATUT[callSelectedResult];
+
+  try {
+    const res = await fetch(apiUrl('/api/prospects'), {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) throw new Error();
+    const idx = prospects.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      prospects[idx].notes = newNotes;
+      if (updates.statut) prospects[idx].statut = updates.statut;
+    }
+    closeCallModal();
+    renderTable(prospects);
+    updateStats(prospects);
+    showToast(`Appel enregistré : ${label}`, 'success');
+  } catch { showToast('Erreur lors de l\'enregistrement', 'error'); }
+}
 
 // ── SCRAPER ───────────────────────────────────────────
 let scraperResults = [];
