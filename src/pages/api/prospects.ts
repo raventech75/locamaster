@@ -72,6 +72,8 @@ export const POST: APIRoute = async ({ request }) => {
       statut: body.statut || 'nouveau',
       notes: body.notes?.trim() || null,
       source: body.source || 'manuel',
+      score: body.score != null ? Number(body.score) : null,
+      note_google: body.note_google != null ? Number(body.note_google) : null,
     };
 
     const res = await fetch(sbUrl('prospects'), {

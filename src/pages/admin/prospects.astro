@@ -207,8 +207,11 @@ if (!adminToken || token !== adminToken) {
     .progress-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 14px; overflow: hidden; display: none; }
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); width: 0%; transition: width .3s; }
 
-    .notes-cell { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #78716c; font-size: 12px; }
-    .actions { display: flex; gap: 4px; flex-wrap: wrap; }
+    .nom-cell { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+    .nom-main { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; color: #fafaf9; }
+    .nom-sub { font-size: 11px; color: #78716c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; margin-top: 2px; }
+    .contact-email { font-size: 11px; color: #60a5fa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+    .actions { display: flex; gap: 4px; flex-wrap: nowrap; }
     .call-badge { display: inline-flex; align-items: center; gap: 3px; background: rgba(245,158,11,.15); color: #fbbf24; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: 4px; border: 1px solid rgba(245,158,11,.25); }
     .btn-call { background: rgba(245,158,11,.1); color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
     /* Call modal */
@@ -426,17 +429,16 @@ if (!adminToken || token !== adminToken) {
     <table>
       <thead>
         <tr>
-          <th>Nom / Entreprise</th>
+          <th>Prospect</th>
           <th>Secteur</th>
+          <th>Score / Note</th>
           <th>Contact</th>
-          <th>Ville</th>
           <th>Statut</th>
-          <th>Notes</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody id="tbody">
-        <tr><td colspan="7" class="empty">Chargement…</td></tr>
+        <tr><td colspan="6" class="empty">Chargement…</td></tr>
       </tbody>
     </table>
   </div>
@@ -669,59 +671,69 @@ function daysSince(dateStr) {
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
 }
 
+function secteurLabel(s) {
+  if (!s) return '<span style="color:#3f3f46">—</span>';
+  if (SECTEUR_LABELS[s]) return SECTEUR_LABELS[s];
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 function renderTable(data) {
   const tbody = document.getElementById('tbody');
   if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty">Aucun prospect trouvé</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Aucun prospect trouvé</td></tr>';
     return;
   }
   tbody.innerHTML = data.map(p => {
+    const score = p.score || computeScore(p);
     const canRelance = p.email && p.email_envoye && p.statut === 'contacte' && daysSince(p.email_envoye_at) >= 4;
     let emailBtn = '';
     if (p.email) {
       emailBtn = p.email_envoye
         ? (canRelance
-          ? `<button class="btn btn-sm btn-relance" onclick="sendRelance('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.email)}','${p.secteur||''}')">↩ Relancer</button>`
-          : `<button class="btn btn-sm btn-email sent" disabled title="Email envoyé il y a ${daysSince(p.email_envoye_at)}j">✓ Envoyé</button>`)
-        : `<button class="btn btn-sm btn-email" onclick="sendEmail('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.email)}','${p.secteur||''}')">✉ Email</button>`;
+          ? `<button class="btn btn-sm btn-relance" title="Envoyer relance" onclick="sendRelance('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.email)}','${p.secteur||''}')">↩</button>`
+          : `<button class="btn btn-sm btn-email sent" disabled title="Email envoyé il y a ${daysSince(p.email_envoye_at)}j">✓</button>`)
+        : `<button class="btn btn-sm btn-email" title="Envoyer email prospection" onclick="sendEmail('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.email)}','${p.secteur||''}')">✉</button>`;
     }
-    // Boutons appel/WhatsApp si pas d'email ou en complément
     const phoneClean = p.telephone ? '33' + p.telephone.replace(/[\s\-\.]/g,'').replace(/^\+33/,'').replace(/^0/,'') : null;
-    const callBtn = p.telephone ? `<a href="tel:${esc(p.telephone)}" class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;text-decoration:none">📞</a>` : '';
-    const waBtn = phoneClean ? `<a href="https://wa.me/${phoneClean}?text=${encodeURIComponent('Bonjour, je suis Feridun de Locamaster. Je vous contacte au sujet de vos visuels professionnels.')}" target="_blank" rel="noopener" class="btn btn-sm" style="background:#dcfce7;color:#166534;text-decoration:none">💬</a>` : '';
+    const callLink = p.telephone ? `<a href="tel:${esc(p.telephone)}" class="btn btn-sm pill-tel" style="text-decoration:none" title="${esc(p.telephone)}">📞</a>` : '';
+    const waLink = phoneClean ? `<a href="https://wa.me/${phoneClean}?text=${encodeURIComponent('Bonjour, je suis Feridun de Locamaster. Je vous contacte au sujet de vos visuels professionnels.')}" target="_blank" rel="noopener" class="btn btn-sm pill-wa" style="text-decoration:none" title="WhatsApp">💬</a>` : '';
+
+    const entDisplay = p.entreprise && p.entreprise !== p.nom ? esc(p.entreprise) : null;
+    const sub = entDisplay || (p.ville ? `📍 ${esc(p.ville)}` : null);
+
     return `
     <tr>
-      <td>
-        <div style="font-weight:600;font-size:13px">
-          ${esc(p.nom)}
-          ${countCalls(p.notes) > 0 ? `<span class="call-badge">📞 ${countCalls(p.notes)}</span>` : ''}
+      <td style="min-width:180px;max-width:260px">
+        <div class="nom-cell">
+          <span class="nom-main" title="${esc(p.nom)}">${esc(p.nom)}</span>
+          ${countCalls(p.notes) > 0 ? `<span class="call-badge" title="${esc(p.notes||'')}">📞 ${countCalls(p.notes)}</span>` : ''}
           ${rappelBadge(p.rappel_le)}
         </div>
-        ${p.entreprise ? `<div style="color:#78716c;font-size:12px">${esc(p.entreprise)}</div>` : ''}
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          ${scoreHtml(p.score || computeScore(p))}
+        ${sub ? `<div class="nom-sub">${sub}</div>` : ''}
+      </td>
+      <td style="font-size:12px;white-space:nowrap">${secteurLabel(p.secteur)}</td>
+      <td style="min-width:120px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          ${scoreHtml(score)}
           ${noteGoogleHtml(p.note_google)}
         </div>
       </td>
-      <td>${p.secteur ? (SECTEUR_LABELS[p.secteur] || p.secteur) : '<span style="color:#a8a29e">—</span>'}</td>
-      <td>
-        ${p.email ? `<a href="mailto:${esc(p.email)}" style="color:#1d4ed8;text-decoration:none;font-size:12px">${esc(p.email)}</a><br>` : ''}
-        ${p.telephone ? `<span style="font-size:12px;color:#57534e">${esc(p.telephone)}</span>` : ''}
-        ${!p.email && !p.telephone ? '<span style="color:#a8a29e">—</span>' : ''}
+      <td style="min-width:140px;max-width:200px">
+        ${p.email ? `<div class="contact-email" title="${esc(p.email)}"><a href="mailto:${esc(p.email)}" style="color:#60a5fa;text-decoration:none">${esc(p.email)}</a></div>` : ''}
+        ${p.telephone ? `<div style="font-size:11px;color:#a8a29e;margin-top:2px">${esc(p.telephone)}</div>` : ''}
+        ${!p.email && !p.telephone ? '<span style="color:#3f3f46">—</span>' : ''}
       </td>
-      <td style="font-size:12px;color:#57534e">${p.ville || '—'}</td>
       <td>
-        <select class="badge badge-${p.statut}" onchange="updateStatut('${p.id}', this.value)" style="border:none;background:transparent;cursor:pointer;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;outline:none">
+        <select class="badge badge-${p.statut}" onchange="updateStatut('${p.id}', this.value)">
           ${Object.entries(STATUT_LABELS).map(([v,l]) => `<option value="${v}" ${p.statut===v?'selected':''}>${l}</option>`).join('')}
         </select>
       </td>
-      <td class="notes-cell" title="${esc(p.notes || '')}">${p.notes ? esc(p.notes) : '<span style="color:#a8a29e">—</span>'}</td>
       <td>
         <div class="actions">
-          ${callBtn}${waBtn}${emailBtn}
-          <button class="btn btn-sm btn-call" onclick="openCallModal('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.notes||'')}')">📞</button>
-          <button class="btn btn-sm btn-ghost" onclick="openEdit('${p.id}')">✏</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteProspect('${p.id}')">✕</button>
+          ${callLink}${waLink}${emailBtn}
+          <button class="btn btn-sm btn-call" title="Logger un appel" onclick="openCallModal('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.notes||'')}')">📋</button>
+          <button class="btn btn-sm btn-ghost" title="Modifier" onclick="openEdit('${p.id}')">✏</button>
+          <button class="btn btn-sm btn-danger" title="Supprimer" onclick="deleteProspect('${p.id}')">✕</button>
         </div>
       </td>
     </tr>`;
@@ -1009,10 +1021,15 @@ function noteGoogleHtml(note) {
 
 function scoreHtml(score) {
   const s = score || 1;
-  const labels = ['','Faible','Bas','Moyen','Fort','🔥 Priorité'];
-  const label = labels[s] || '';
-  const dots = [1,2,3,4,5].map(i => `<span class="score-dot${i<=s?' on':''}"></span>`).join('');
-  return `<div class="score-wrap"><div class="score score-${s}" title="Besoin estimé : ${label}">${dots}</div><span class="score-label">${label}</span></div>`;
+  const cfg = [null,
+    { c:'#22c55e', b:'rgba(34,197,94,.12)', l:'Faible' },
+    { c:'#84cc16', b:'rgba(132,204,22,.12)', l:'Bas' },
+    { c:'#f59e0b', b:'rgba(245,158,11,.12)', l:'Moyen' },
+    { c:'#f97316', b:'rgba(249,115,22,.12)', l:'Fort' },
+    { c:'#ef4444', b:'rgba(239,68,68,.12)', l:'🔥 Priorité' },
+  ];
+  const { c, b, l } = cfg[s] || cfg[1];
+  return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;background:${b};color:${c};border:1px solid ${c}44;white-space:nowrap" title="Score besoin estimé">${l}</span>`;
 }
 
 // ── RAPPEL ────────────────────────────────────────────
