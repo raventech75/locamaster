@@ -1,14 +1,14 @@
 import type { APIRoute } from 'astro';
-import { createClient } from '@supabase/supabase-js';
 
 export const prerender = false;
 
 const getEnv = (k: string): string | undefined => process.env[k];
 
-function getSupabase() {
+async function getSupabase() {
   const url = getEnv('PUBLIC_SUPABASE_URL');
   const key = getEnv('SUPABASE_SERVICE_ROLE_KEY');
-  if (!url || !key) throw new Error('Supabase non configuré');
+  if (!url || !key) throw new Error(`Supabase non configuré — URL:${!!url} KEY:${!!key}`);
+  const { createClient } = await import('@supabase/supabase-js');
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
@@ -25,50 +25,38 @@ function checkToken(request: Request): boolean {
   return !!adminToken && token === adminToken;
 }
 
-// GET /api/prospects?token=xxx[&statut=xxx][&secteur=xxx]
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status, headers: { 'Content-Type': 'application/json' },
+  });
+}
+
 export const GET: APIRoute = async ({ request }) => {
-  if (!checkToken(request)) return unauthorized();
   try {
+    if (!checkToken(request)) return unauthorized();
     const url = new URL(request.url);
-
-    // Diagnostic : vérifier les env vars
-    const supabaseUrl = getEnv('PUBLIC_SUPABASE_URL');
-    const supabaseKey = getEnv('SUPABASE_SERVICE_ROLE_KEY');
-    if (!supabaseUrl || !supabaseKey) {
-      return new Response(JSON.stringify({
-        error: 'Variables Supabase manquantes',
-        details: { PUBLIC_SUPABASE_URL: !!supabaseUrl, SUPABASE_SERVICE_ROLE_KEY: !!supabaseKey },
-      }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-    }
-
-    const supabase = getSupabase();
+    const supabase = await getSupabase();
     let query = supabase.from('prospects').select('*').order('created_at', { ascending: false });
     const statut = url.searchParams.get('statut');
     const secteur = url.searchParams.get('secteur');
     if (statut && statut !== 'tous') query = query.eq('statut', statut);
     if (secteur && secteur !== 'tous') query = query.eq('secteur', secteur);
     const { data, error } = await query;
-    if (error) {
-      console.error('[prospects] Supabase error:', error);
-      return new Response(JSON.stringify({ error: error.message, code: error.code }), { status: 500, headers: { 'Content-Type': 'application/json' } });
-    }
-    return new Response(JSON.stringify(data ?? []), { status: 200, headers: { 'Content-Type': 'application/json' } });
-  } catch (e) {
+    if (error) throw new Error(`Supabase: ${error.message} (${error.code})`);
+    return json(data ?? []);
+  } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
-    console.error('[prospects] GET error:', msg);
-    return new Response(JSON.stringify({ error: msg }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    console.error('[prospects GET]', msg);
+    return json({ error: msg }, 500);
   }
 };
 
-// POST /api/prospects?token=xxx — créer un prospect
 export const POST: APIRoute = async ({ request }) => {
-  if (!checkToken(request)) return unauthorized();
   try {
+    if (!checkToken(request)) return unauthorized();
     const body = await request.json();
-    if (!body.nom?.trim()) {
-      return new Response(JSON.stringify({ error: 'Nom requis' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-    }
-    const supabase = getSupabase();
+    if (!body.nom?.trim()) return json({ error: 'Nom requis' }, 400);
+    const supabase = await getSupabase();
     const { data, error } = await supabase.from('prospects').insert([{
       nom: body.nom.trim(),
       entreprise: body.entreprise?.trim() || null,
@@ -80,40 +68,44 @@ export const POST: APIRoute = async ({ request }) => {
       notes: body.notes?.trim() || null,
       source: body.source || 'manuel',
     }]).select().single();
-    if (error) throw error;
-    return new Response(JSON.stringify(data), { status: 201, headers: { 'Content-Type': 'application/json' } });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    if (error) throw new Error(`Supabase: ${error.message} (${error.code})`);
+    return json(data, 201);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error('[prospects POST]', msg);
+    return json({ error: msg }, 500);
   }
 };
 
-// PATCH /api/prospects?token=xxx — mettre à jour un prospect
 export const PATCH: APIRoute = async ({ request }) => {
-  if (!checkToken(request)) return unauthorized();
   try {
+    if (!checkToken(request)) return unauthorized();
     const body = await request.json();
-    if (!body.id) return new Response(JSON.stringify({ error: 'id requis' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    if (!body.id) return json({ error: 'id requis' }, 400);
     const { id, ...updates } = body;
-    const supabase = getSupabase();
+    const supabase = await getSupabase();
     const { data, error } = await supabase.from('prospects').update(updates).eq('id', id).select().single();
-    if (error) throw error;
-    return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    if (error) throw new Error(`Supabase: ${error.message} (${error.code})`);
+    return json(data);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error('[prospects PATCH]', msg);
+    return json({ error: msg }, 500);
   }
 };
 
-// DELETE /api/prospects?token=xxx — supprimer un prospect
 export const DELETE: APIRoute = async ({ request }) => {
-  if (!checkToken(request)) return unauthorized();
   try {
+    if (!checkToken(request)) return unauthorized();
     const body = await request.json();
-    if (!body.id) return new Response(JSON.stringify({ error: 'id requis' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
-    const supabase = getSupabase();
+    if (!body.id) return json({ error: 'id requis' }, 400);
+    const supabase = await getSupabase();
     const { error } = await supabase.from('prospects').delete().eq('id', body.id);
-    if (error) throw error;
-    return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    if (error) throw new Error(`Supabase: ${error.message} (${error.code})`);
+    return json({ success: true });
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error('[prospects DELETE]', msg);
+    return json({ error: msg }, 500);
   }
 };
