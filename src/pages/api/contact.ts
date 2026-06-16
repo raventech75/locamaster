@@ -128,8 +128,8 @@ export const POST: APIRoute = async ({ request }) => {
     // --------------------------------------------------------
     // 3. EMAIL via Resend (notification, optionnel)
     // --------------------------------------------------------
-    const RESEND_API_KEY = env('RESEND_API_KEY');
-    const NOTIFICATION_EMAIL = env('NOTIFICATION_EMAIL') || 'contact@locamaster.fr';
+    const RESEND_API_KEY = getEnv('RESEND_API_KEY');
+    const NOTIFICATION_EMAIL = getEnv('NOTIFICATION_EMAIL') || 'contact@locamaster.fr';
     if (RESEND_API_KEY) {
       try {
         await fetch('https://api.resend.com/emails', {
