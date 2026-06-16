@@ -77,6 +77,13 @@ if (!adminToken || token !== adminToken) {
     .scraper-table tr:hover td { background: #fafaf9; }
     .email-found { color: #059669; font-weight: 600; }
     .email-missing { color: #a8a29e; font-style: italic; }
+    .contact-links { display: flex; flex-wrap: wrap; gap: 4px; }
+    .contact-pill { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 20px; font-size: 11px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .pill-tel { background: #e0f2fe; color: #0369a1; }
+    .pill-wa { background: #dcfce7; color: #166534; }
+    .pill-email { background: #ede9fe; color: #5b21b6; }
+    .pill-ig { background: #fce7f3; color: #9d174d; }
+    .pill-fb { background: #dbeafe; color: #1e40af; }
     .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid #e7e5e4; border-top-color: #f59e0b; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 4px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -245,7 +252,7 @@ if (!adminToken || token !== adminToken) {
           <h4 id="sc-count"></h4>
           <div class="scraper-actions">
             <button class="btn btn-sm btn-ghost" onclick="selectAllScraper()">Tout sélectionner</button>
-            <button class="btn btn-sm btn-auto" onclick="importAndEmailSelected()">⚡ Importer + envoyer emails</button>
+            <button class="btn btn-sm btn-auto" onclick="importAndContactSelected()">⚡ Importer + contacter</button>
             <button class="btn btn-sm btn-ghost" onclick="importOnlySelected()">⬆ Importer seulement</button>
           </div>
         </div>
@@ -255,8 +262,7 @@ if (!adminToken || token !== adminToken) {
               <tr>
                 <th><input type="checkbox" id="sc-check-all" onchange="toggleAllScraper(this.checked)" /></th>
                 <th>Commerce</th>
-                <th>Téléphone</th>
-                <th>Email trouvé</th>
+                <th>Contacts disponibles</th>
                 <th>Ville</th>
                 <th>Site web</th>
               </tr>
@@ -489,13 +495,18 @@ function renderTable(data) {
   }
   tbody.innerHTML = data.map(p => {
     const canRelance = p.email && p.email_envoye && p.statut === 'contacte' && daysSince(p.email_envoye_at) >= 4;
-    const emailBtn = p.email
-      ? (p.email_envoye
+    let emailBtn = '';
+    if (p.email) {
+      emailBtn = p.email_envoye
         ? (canRelance
           ? `<button class="btn btn-sm btn-relance" onclick="sendRelance('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.email)}','${p.secteur||''}')">↩ Relancer</button>`
           : `<button class="btn btn-sm btn-email sent" disabled title="Email envoyé il y a ${daysSince(p.email_envoye_at)}j">✓ Envoyé</button>`)
-        : `<button class="btn btn-sm btn-email" onclick="sendEmail('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.email)}','${p.secteur||''}')">✉ Email</button>`)
-      : '';
+        : `<button class="btn btn-sm btn-email" onclick="sendEmail('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.email)}','${p.secteur||''}')">✉ Email</button>`;
+    }
+    // Boutons appel/WhatsApp si pas d'email ou en complément
+    const phoneClean = p.telephone ? '33' + p.telephone.replace(/[\s\-\.]/g,'').replace(/^\+33/,'').replace(/^0/,'') : null;
+    const callBtn = p.telephone ? `<a href="tel:${esc(p.telephone)}" class="btn btn-sm" style="background:#e0f2fe;color:#0369a1;text-decoration:none">📞</a>` : '';
+    const waBtn = phoneClean ? `<a href="https://wa.me/${phoneClean}?text=${encodeURIComponent('Bonjour, je suis Feridun de Locamaster. Je vous contacte au sujet de vos visuels professionnels.')}" target="_blank" rel="noopener" class="btn btn-sm" style="background:#dcfce7;color:#166534;text-decoration:none">💬</a>` : '';
     return `
     <tr>
       <td>
@@ -517,8 +528,8 @@ function renderTable(data) {
       <td class="notes-cell" title="${esc(p.notes || '')}">${p.notes ? esc(p.notes) : '<span style="color:#a8a29e">—</span>'}</td>
       <td>
         <div class="actions">
-          ${emailBtn}
-          <button class="btn btn-sm btn-ghost" onclick="openEdit('${p.id}')">Éditer</button>
+          ${callBtn}${waBtn}${emailBtn}
+          <button class="btn btn-sm btn-ghost" onclick="openEdit('${p.id}')">✏</button>
           <button class="btn btn-sm btn-danger" onclick="deleteProspect('${p.id}')">✕</button>
         </div>
       </td>
@@ -837,16 +848,25 @@ async function runScraper() {
 
 function renderScraperResults() {
   const tbody = document.getElementById('sc-tbody');
-  tbody.innerHTML = scraperResults.map((r, i) => `
+  tbody.innerHTML = scraperResults.map((r, i) => {
+    const hasContact = r.email || r.telephone;
+    const pills = [];
+    if (r.email) pills.push(`<a href="mailto:${esc(r.email)}" class="contact-pill pill-email" title="${esc(r.email)}">✉ Email</a>`);
+    if (r.telephone) {
+      pills.push(`<a href="tel:${esc(r.telephone)}" class="contact-pill pill-tel">📞 ${esc(r.telephone)}</a>`);
+      if (r.telephone_wa) pills.push(`<a href="https://wa.me/${esc(r.telephone_wa)}" target="_blank" rel="noopener" class="contact-pill pill-wa">💬 WhatsApp</a>`);
+    }
+    if (r.instagram) pills.push(`<a href="${esc(r.instagram)}" target="_blank" rel="noopener" class="contact-pill pill-ig">📷 Instagram</a>`);
+    if (r.facebook) pills.push(`<a href="${esc(r.facebook)}" target="_blank" rel="noopener" class="contact-pill pill-fb">Facebook</a>`);
+    return `
     <tr>
-      <td><input type="checkbox" class="sc-row-check" data-idx="${i}" ${r.email ? 'checked' : ''} /></td>
+      <td><input type="checkbox" class="sc-row-check" data-idx="${i}" ${hasContact ? 'checked' : ''} /></td>
       <td><strong>${esc(r.nom)}</strong></td>
-      <td style="color:#57534e">${r.telephone ? esc(r.telephone) : '<span class="email-missing">—</span>'}</td>
-      <td>${r.email ? `<span class="email-found">✓ ${esc(r.email)}</span>` : '<span class="email-missing">Non trouvé</span>'}</td>
+      <td><div class="contact-links">${pills.length ? pills.join('') : '<span class="email-missing">Aucun contact</span>'}</div></td>
       <td style="color:#57534e;font-size:11px">${esc(r.ville)}</td>
-      <td>${r.website ? `<a href="${esc(r.website)}" target="_blank" rel="noopener" style="color:#1d4ed8;font-size:11px;text-decoration:none" title="${esc(r.website)}">↗ Site</a>` : '<span class="email-missing">—</span>'}</td>
-    </tr>
-  `).join('');
+      <td>${r.website ? `<a href="${esc(r.website)}" target="_blank" rel="noopener" style="color:#1d4ed8;font-size:11px;text-decoration:none">↗ Site</a>` : '<span class="email-missing">—</span>'}</td>
+    </tr>`;
+  }).join('');
 }
 
 function selectAllScraper() {
@@ -886,22 +906,26 @@ async function importOnlySelected() {
   showToast(`${ok} prospect(s) importé(s)`, 'success');
 }
 
-async function importAndEmailSelected() {
+async function importAndContactSelected() {
   const selected = getSelectedScraper();
   if (!selected.length) { showToast('Sélectionne au moins un prospect', 'error'); return; }
   const withEmail = selected.filter(r => r.email);
-  if (!withEmail.length) { showToast('Aucun email trouvé dans la sélection', 'error'); return; }
-  if (!confirm(`Importer ${selected.length} prospect(s) et envoyer ${withEmail.length} email(s) de prospection ?`)) return;
+  const withPhoneOnly = selected.filter(r => !r.email && r.telephone);
+  if (!confirm(`Importer ${selected.length} prospect(s) ?\n→ ${withEmail.length} avec email (envoi auto)\n→ ${withPhoneOnly.length} sans email (statut "À appeler")`)) return;
 
   let imported = 0, emailed = 0;
   for (const r of selected) {
     try {
+      const statut = r.email ? 'nouveau' : 'nouveau';
+      const notes = !r.email && r.telephone
+        ? `📞 À appeler${r.telephone_wa ? ` · WhatsApp : wa.me/${r.telephone_wa}` : ''}${r.instagram ? ` · Instagram : ${r.instagram}` : ''}`
+        : (r.instagram ? `Instagram : ${r.instagram}` : '');
       const res = await fetch(apiUrl('/api/prospects'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nom: r.nom, entreprise: r.entreprise, email: r.email,
           telephone: r.telephone, ville: r.ville, secteur: r.secteur,
-          source: 'google-maps', statut: 'nouveau',
+          source: 'google-maps', statut, notes: notes || null,
         }),
       });
       if (!res.ok) continue;

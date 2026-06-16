@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
     limit: String(Math.min(max, 20)),
     language: 'fr',
     region: 'FR',
-    fields: 'name,full_address,phone,site,emails_from_website,place_id',
+    fields: 'name,full_address,phone,site,emails_from_website,social_networks,place_id',
     async: 'false',
   });
 
@@ -57,13 +57,21 @@ export const POST: APIRoute = async ({ request }) => {
   const results = places.map((p) => {
     const emails: string[] = (p.emails_from_website as string[]) || [];
     const email = emails[0] || null;
+    const socials = (p.social_networks as Record<string, string>) || {};
+    const phone = (p.phone as string) || null;
+    const phoneWa = phone
+      ? '33' + phone.replace(/[\s\-\.]/g, '').replace(/^\+33/, '').replace(/^0/, '')
+      : null;
     return {
       nom: (p.name as string) || '',
       entreprise: (p.name as string) || '',
-      telephone: (p.phone as string) || null,
+      telephone: phone,
+      telephone_wa: phoneWa,
       ville: extractVille((p.full_address as string) || '', ville),
       website: (p.site as string) || null,
       email,
+      instagram: socials.instagram || null,
+      facebook: socials.facebook || null,
       source: 'google-maps',
       secteur: secteurNorm,
     };
