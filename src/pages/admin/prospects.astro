@@ -56,6 +56,29 @@ if (!adminToken || token !== adminToken) {
     .finder-link.insta { background: #fce4ec; border-color: #f48fb1; color: #880e4f; }
     .finder-link.pages { background: #e3f2fd; border-color: #90caf9; color: #0d47a1; }
     .finder-tip { margin-top: 12px; font-size: 12px; color: #78716c; background: #fafaf9; border-radius: 8px; padding: 10px 14px; line-height: 1.6; }
+    /* Scraper auto */
+    .scraper-sep { border: none; border-top: 1px solid #e7e5e4; margin: 18px 0; }
+    .scraper-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .scraper-badge { background: #dcfce7; color: #14532d; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+    .scraper-status { font-size: 12px; color: #78716c; margin-top: 10px; min-height: 18px; }
+    .scraper-status.running { color: #f59e0b; font-weight: 600; }
+    .scraper-status.done { color: #059669; font-weight: 600; }
+    .scraper-status.err { color: #dc2626; font-weight: 600; }
+    .scraper-results { margin-top: 14px; display: none; }
+    .scraper-results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+    .scraper-results-header h4 { font-size: 13px; font-weight: 700; }
+    .scraper-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-auto { background: #dcfce7; color: #14532d; border: 1px solid #86efac; }
+    .scraper-table-wrap { border: 1px solid #e7e5e4; border-radius: 10px; overflow: hidden; }
+    .scraper-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .scraper-table th { background: #fafaf9; padding: 8px 12px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: #78716c; border-bottom: 1px solid #e7e5e4; }
+    .scraper-table td { padding: 9px 12px; border-bottom: 1px solid #f5f5f4; vertical-align: middle; }
+    .scraper-table tr:last-child td { border-bottom: none; }
+    .scraper-table tr:hover td { background: #fafaf9; }
+    .email-found { color: #059669; font-weight: 600; }
+    .email-missing { color: #a8a29e; font-style: italic; }
+    .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid #e7e5e4; border-top-color: #f59e0b; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 4px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Toolbar */
     .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
@@ -180,8 +203,67 @@ if (!adminToken || token !== adminToken) {
         <button class="finder-link" onclick="copyScript()">📋 Copier script cold email</button>
       </div>
       <div class="finder-tip">
-        💡 <strong>Méthode rapide :</strong> Ouvre Google Maps → copie nom + adresse + email depuis la fiche → ajoute le prospect ici ou importe un CSV.<br>
-        Sur <strong>Pages Jaunes</strong> tu trouves souvent l'email directement. Sur <strong>Instagram</strong> cherche le secteur + ville dans la bio.
+        💡 <strong>Méthode manuelle :</strong> Ouvre Google Maps → copie nom + adresse + email depuis la fiche → ajoute le prospect ou importe via CSV.<br>
+        Ou utilise le <strong>Scraper automatique</strong> ci-dessous pour tout faire en un clic.
+      </div>
+
+      <!-- SCRAPER AUTOMATIQUE -->
+      <hr class="scraper-sep" />
+      <div class="scraper-title">
+        🤖 Scraper automatique
+        <span class="scraper-badge">Bêta</span>
+      </div>
+      <div class="finder-row">
+        <div class="fg">
+          <label>Secteur</label>
+          <select id="sc-secteur">
+            <option value="restaurateurs">Restaurateurs</option>
+            <option value="fleuristes">Fleuristes</option>
+            <option value="coiffeurs">Coiffeurs</option>
+            <option value="boulangeries">Boulangeries</option>
+            <option value="antiquaires">Antiquaires</option>
+            <option value="librairies">Librairies</option>
+            <option value="architectes">Architectes</option>
+            <option value="photographes">Photographes</option>
+            <option value="commerces">Commerces de proximité</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Ville</label>
+          <input type="text" id="sc-ville" value="Paris" placeholder="Paris 11e, Vincennes…" style="width:160px" />
+        </div>
+        <div class="fg">
+          <label>Nb résultats</label>
+          <input type="number" id="sc-max" value="10" min="1" max="20" style="width:80px" />
+        </div>
+        <button class="btn btn-primary" onclick="runScraper()" id="sc-btn">🔍 Lancer la recherche</button>
+      </div>
+      <div class="scraper-status" id="sc-status"></div>
+
+      <div class="scraper-results" id="sc-results">
+        <div class="scraper-results-header">
+          <h4 id="sc-count"></h4>
+          <div class="scraper-actions">
+            <button class="btn btn-sm btn-ghost" onclick="selectAllScraper()">Tout sélectionner</button>
+            <button class="btn btn-sm btn-auto" onclick="importAndEmailSelected()">⚡ Importer + envoyer emails</button>
+            <button class="btn btn-sm btn-ghost" onclick="importOnlySelected()">⬆ Importer seulement</button>
+          </div>
+        </div>
+        <div class="scraper-table-wrap">
+          <table class="scraper-table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="sc-check-all" onchange="toggleAllScraper(this.checked)" /></th>
+                <th>Commerce</th>
+                <th>Téléphone</th>
+                <th>Email trouvé</th>
+                <th>Ville</th>
+                <th>Site web</th>
+              </tr>
+            </thead>
+            <tbody id="sc-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -708,6 +790,145 @@ function showToast(msg, type = '') {
 
 document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 document.getElementById('import-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeImportModal(); });
+
+// ── SCRAPER ───────────────────────────────────────────
+let scraperResults = [];
+
+async function runScraper() {
+  const secteur = document.getElementById('sc-secteur').value;
+  const ville = document.getElementById('sc-ville').value.trim() || 'Paris';
+  const max = parseInt(document.getElementById('sc-max').value) || 10;
+  const btn = document.getElementById('sc-btn');
+  const status = document.getElementById('sc-status');
+  const resultsDiv = document.getElementById('sc-results');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Recherche en cours…';
+  status.className = 'scraper-status running';
+  status.innerHTML = `<span class="spinner"></span> Recherche de ${secteur} à ${ville} sur Google Maps + extraction des emails…`;
+  resultsDiv.style.display = 'none';
+
+  try {
+    const res = await fetch(apiUrl('/api/scrape-prospects'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secteur, ville, max }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erreur serveur');
+
+    scraperResults = data.results || [];
+    const withEmail = scraperResults.filter(r => r.email).length;
+
+    status.className = 'scraper-status done';
+    status.textContent = `✓ ${scraperResults.length} commerce(s) trouvé(s) · ${withEmail} email(s) extrait(s) automatiquement`;
+
+    renderScraperResults();
+    resultsDiv.style.display = 'block';
+    document.getElementById('sc-count').textContent = `${scraperResults.length} résultats — ${withEmail} avec email`;
+  } catch (e) {
+    status.className = 'scraper-status err';
+    status.textContent = '✗ Erreur : ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 Lancer la recherche';
+  }
+}
+
+function renderScraperResults() {
+  const tbody = document.getElementById('sc-tbody');
+  tbody.innerHTML = scraperResults.map((r, i) => `
+    <tr>
+      <td><input type="checkbox" class="sc-row-check" data-idx="${i}" ${r.email ? 'checked' : ''} /></td>
+      <td><strong>${esc(r.nom)}</strong></td>
+      <td style="color:#57534e">${r.telephone ? esc(r.telephone) : '<span class="email-missing">—</span>'}</td>
+      <td>${r.email ? `<span class="email-found">✓ ${esc(r.email)}</span>` : '<span class="email-missing">Non trouvé</span>'}</td>
+      <td style="color:#57534e;font-size:11px">${esc(r.ville)}</td>
+      <td>${r.website ? `<a href="${esc(r.website)}" target="_blank" rel="noopener" style="color:#1d4ed8;font-size:11px;text-decoration:none" title="${esc(r.website)}">↗ Site</a>` : '<span class="email-missing">—</span>'}</td>
+    </tr>
+  `).join('');
+}
+
+function selectAllScraper() {
+  document.querySelectorAll('.sc-row-check').forEach(cb => cb.checked = true);
+  document.getElementById('sc-check-all').checked = true;
+}
+
+function toggleAllScraper(checked) {
+  document.querySelectorAll('.sc-row-check').forEach(cb => cb.checked = checked);
+}
+
+function getSelectedScraper() {
+  return [...document.querySelectorAll('.sc-row-check:checked')]
+    .map(cb => scraperResults[parseInt(cb.dataset.idx)])
+    .filter(Boolean);
+}
+
+async function importOnlySelected() {
+  const selected = getSelectedScraper();
+  if (!selected.length) { showToast('Sélectionne au moins un prospect', 'error'); return; }
+  let ok = 0;
+  for (const r of selected) {
+    try {
+      const res = await fetch(apiUrl('/api/prospects'), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nom: r.nom, entreprise: r.entreprise, email: r.email,
+          telephone: r.telephone, ville: r.ville, secteur: r.secteur,
+          source: 'google-maps', statut: 'nouveau',
+        }),
+      });
+      if (res.ok) { ok++; const created = await res.json(); prospects.unshift(created); }
+    } catch {}
+  }
+  renderTable(prospects);
+  updateStats(prospects);
+  showToast(`${ok} prospect(s) importé(s)`, 'success');
+}
+
+async function importAndEmailSelected() {
+  const selected = getSelectedScraper();
+  if (!selected.length) { showToast('Sélectionne au moins un prospect', 'error'); return; }
+  const withEmail = selected.filter(r => r.email);
+  if (!withEmail.length) { showToast('Aucun email trouvé dans la sélection', 'error'); return; }
+  if (!confirm(`Importer ${selected.length} prospect(s) et envoyer ${withEmail.length} email(s) de prospection ?`)) return;
+
+  let imported = 0, emailed = 0;
+  for (const r of selected) {
+    try {
+      const res = await fetch(apiUrl('/api/prospects'), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nom: r.nom, entreprise: r.entreprise, email: r.email,
+          telephone: r.telephone, ville: r.ville, secteur: r.secteur,
+          source: 'google-maps', statut: 'nouveau',
+        }),
+      });
+      if (!res.ok) continue;
+      const created = await res.json();
+      prospects.unshift(created);
+      imported++;
+
+      if (r.email) {
+        const emailRes = await fetch(apiUrl('/api/send-prospect-email'), {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prospectId: created.id, nom: r.nom, entreprise: r.entreprise,
+            email: r.email, secteur: r.secteur, type: 'prospection',
+          }),
+        });
+        if (emailRes.ok) {
+          const idx = prospects.findIndex(p => p.id === created.id);
+          if (idx !== -1) { prospects[idx].email_envoye = true; prospects[idx].statut = 'contacte'; }
+          emailed++;
+        }
+      }
+    } catch {}
+  }
+  renderTable(prospects);
+  updateStats(prospects);
+  showToast(`✓ ${imported} importé(s) · ${emailed} email(s) envoyé(s)`, 'success');
+}
 
 loadProspects();
 </script>
