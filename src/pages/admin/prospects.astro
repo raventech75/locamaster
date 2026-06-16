@@ -36,6 +36,39 @@ if (!adminToken || token !== adminToken) {
     .stat.s-contacte .stat-value { color: #f59e0b; }
     .stat.s-interesse .stat-value { color: #10b981; }
     .stat.s-signe .stat-value { color: #059669; }
+    .stat.s-pipeline .stat-value { color: #7c3aed; }
+    .stat.s-rappel .stat-value { color: #dc2626; }
+
+    /* Score */
+    .score { display: inline-flex; gap: 2px; }
+    .score-dot { width: 8px; height: 8px; border-radius: 50%; background: #e7e5e4; }
+    .score-dot.on { background: #f59e0b; }
+    .score-5 .score-dot.on { background: #dc2626; }
+    .score-4 .score-dot.on { background: #f97316; }
+    .score-3 .score-dot.on { background: #f59e0b; }
+    .score-2 .score-dot.on { background: #84cc16; }
+    .score-1 .score-dot.on { background: #22c55e; }
+
+    /* Rappel */
+    .rappel-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; margin-left: 4px; }
+    .rappel-today { background: #fee2e2; color: #dc2626; }
+    .rappel-soon { background: #fef3c7; color: #92400e; }
+    .rappel-future { background: #f0fdf4; color: #166534; }
+
+    /* Kanban */
+    .view-toggle { display: flex; gap: 4px; }
+    .view-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid #d6d3d1; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .view-btn.active { background: #1c1917; color: #fff; border-color: #1c1917; }
+    .kanban-wrap { display: none; overflow-x: auto; padding-bottom: 8px; }
+    .kanban-wrap.visible { display: flex; gap: 12px; }
+    .kanban-col { min-width: 200px; flex: 1; }
+    .kanban-col-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #78716c; padding: 8px 12px; background: #fafaf9; border: 1px solid #e7e5e4; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; }
+    .kanban-col-body { border: 1px solid #e7e5e4; border-top: none; border-radius: 0 0 10px 10px; min-height: 120px; padding: 8px; display: flex; flex-direction: column; gap: 6px; background: #fff; }
+    .kanban-card { background: #fafaf9; border: 1px solid #e7e5e4; border-radius: 8px; padding: 10px 12px; cursor: default; }
+    .kanban-card:hover { border-color: #f59e0b; background: #fffbeb; }
+    .kanban-card-name { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+    .kanban-card-meta { font-size: 11px; color: #78716c; }
+    .kanban-card-actions { display: flex; gap: 4px; margin-top: 6px; }
 
     /* Finder panel */
     .finder { background: #fff; border: 1px solid #e7e5e4; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; }
@@ -182,6 +215,8 @@ if (!adminToken || token !== adminToken) {
     <div class="stat s-contacte"><div class="stat-value" id="s-contacte">—</div><div class="stat-label">Contactés</div></div>
     <div class="stat s-interesse"><div class="stat-value" id="s-interesse">—</div><div class="stat-label">Intéressés</div></div>
     <div class="stat s-signe"><div class="stat-value" id="s-signe">—</div><div class="stat-label">Signés</div></div>
+    <div class="stat s-pipeline"><div class="stat-value" id="s-pipeline">—</div><div class="stat-label">💰 Pipeline</div></div>
+    <div class="stat s-rappel"><div class="stat-value" id="s-rappel">—</div><div class="stat-label">📅 À rappeler</div></div>
   </div>
 
   <!-- Finder panel -->
@@ -338,13 +373,26 @@ if (!adminToken || token !== adminToken) {
       <option value="coach">Coach / Thérapeute</option>
       <option value="autre">Autre</option>
     </select>
+    <select id="filter-rappel" onchange="filterTable()">
+      <option value="tous">Tous les rappels</option>
+      <option value="today">📅 À rappeler aujourd'hui</option>
+      <option value="overdue">🔴 En retard</option>
+    </select>
     <button class="btn btn-primary" onclick="openModal()">+ Ajouter</button>
-    <button class="btn btn-import" onclick="openImportModal()">⬆ Importer CSV</button>
-    <button class="btn btn-ghost" onclick="loadProspects()">↻ Actualiser</button>
+    <button class="btn btn-import" onclick="openImportModal()">⬆ CSV</button>
+    <button class="btn btn-ghost" onclick="exportCsv()">⬇ Export</button>
+    <button class="btn btn-ghost" onclick="loadProspects()">↻</button>
+    <div class="view-toggle">
+      <button class="view-btn active" id="btn-view-table" onclick="setView('table')">≡ Liste</button>
+      <button class="view-btn" id="btn-view-kanban" onclick="setView('kanban')">⊞ Kanban</button>
+    </div>
   </div>
 
+  <!-- Kanban -->
+  <div class="kanban-wrap" id="kanban-wrap"></div>
+
   <!-- Table -->
-  <div class="table-wrap">
+  <div class="table-wrap" id="table-wrap">
     <table>
       <thead>
         <tr>
@@ -398,6 +446,10 @@ if (!adminToken || token !== adminToken) {
         <input type="radio" name="call-result" value="rdv_pris" />
         🎯 RDV pris !
       </label>
+    </div>
+    <div id="call-rappel-wrap" style="display:none;margin-bottom:12px">
+      <label for="call-rappel-date" style="font-size:12px;font-weight:600;color:#57534e">Date de rappel</label>
+      <input type="date" id="call-rappel-date" style="margin-top:4px;width:100%;border:1px solid #d6d3d1;border-radius:8px;padding:9px 11px;font-size:13px;outline:none" />
     </div>
     <div>
       <label for="call-note" style="font-size:12px;font-weight:600;color:#57534e">Note rapide (optionnel)</label>
@@ -544,12 +596,21 @@ async function loadProspects() {
   } catch (e) { showToast('Erreur de chargement', 'error'); }
 }
 
+const PRIX_PIPELINE = { interesse: 950, en_cours: 950, signe: 950 };
+const TODAY = new Date().toISOString().split('T')[0];
+
 function updateStats(data) {
   document.getElementById('s-total').textContent = data.length;
   ['nouveau','contacte','interesse','signe'].forEach(s => {
     const el = document.getElementById('s-' + s);
     if (el) el.textContent = data.filter(p => p.statut === s).length;
   });
+  // Pipeline
+  const pipeline = data.reduce((sum, p) => sum + (PRIX_PIPELINE[p.statut] || 0), 0);
+  document.getElementById('s-pipeline').textContent = pipeline > 0 ? pipeline.toLocaleString('fr-FR') + ' €' : '0 €';
+  // Rappels en retard ou aujourd'hui
+  const rappels = data.filter(p => p.rappel_le && p.rappel_le <= TODAY).length;
+  document.getElementById('s-rappel').textContent = rappels || '0';
 }
 
 // ── FILTER ────────────────────────────────────────────
@@ -557,13 +618,19 @@ function filterTable() {
   const q = document.getElementById('search').value.toLowerCase();
   const statut = document.getElementById('filter-statut').value;
   const secteur = document.getElementById('filter-secteur').value;
+  const rappel = document.getElementById('filter-rappel').value;
   const filtered = prospects.filter(p => {
     const matchQ = !q || [p.nom, p.entreprise, p.ville].some(v => v?.toLowerCase().includes(q));
     const matchS = statut === 'tous' || p.statut === statut;
     const matchSec = secteur === 'tous' || p.secteur === secteur;
-    return matchQ && matchS && matchSec;
+    const matchR = rappel === 'tous' ? true
+      : rappel === 'today' ? p.rappel_le === TODAY
+      : rappel === 'overdue' ? (p.rappel_le && p.rappel_le < TODAY)
+      : true;
+    return matchQ && matchS && matchSec && matchR;
   });
   renderTable(filtered);
+  renderKanban(filtered);
 }
 
 // ── RENDER ────────────────────────────────────────────
@@ -598,8 +665,10 @@ function renderTable(data) {
         <div style="font-weight:600;font-size:13px">
           ${esc(p.nom)}
           ${countCalls(p.notes) > 0 ? `<span class="call-badge">📞 ${countCalls(p.notes)}</span>` : ''}
+          ${rappelBadge(p.rappel_le)}
         </div>
         ${p.entreprise ? `<div style="color:#78716c;font-size:12px">${esc(p.entreprise)}</div>` : ''}
+        ${scoreHtml(p.score || computeScore(p))}
       </td>
       <td>${p.secteur ? (SECTEUR_LABELS[p.secteur] || p.secteur) : '<span style="color:#a8a29e">—</span>'}</td>
       <td>
@@ -888,6 +957,107 @@ function showToast(msg, type = '') {
   setTimeout(() => { t.className = 'toast'; }, 3500);
 }
 
+// ── SCORE ─────────────────────────────────────────────
+function computeScore(p) {
+  let s = 0;
+  if (!p.email) s += 2;
+  if (!p.website && !p.notes?.includes('↗')) s += 1;
+  if (p.telephone) s += 1;
+  if (countCalls(p.notes) === 0) s += 1;
+  return Math.min(5, Math.max(1, s));
+}
+function scoreHtml(score) {
+  const s = score || 1;
+  const label = ['','Faible','Bas','Moyen','Fort','Priorité'][s] || '';
+  return `<div class="score score-${s}" title="Besoin estimé : ${label}">${[1,2,3,4,5].map(i => `<span class="score-dot${i<=s?' on':''}"></span>`).join('')}</div>`;
+}
+
+// ── RAPPEL ────────────────────────────────────────────
+function rappelBadge(date) {
+  if (!date) return '';
+  if (date < TODAY) return `<span class="rappel-badge rappel-today">🔴 ${formatDate(date)}</span>`;
+  if (date === TODAY) return `<span class="rappel-badge rappel-today">📅 Aujourd'hui</span>`;
+  const diff = Math.ceil((new Date(date) - new Date(TODAY)) / 86400000);
+  if (diff <= 3) return `<span class="rappel-badge rappel-soon">📅 J+${diff}</span>`;
+  return `<span class="rappel-badge rappel-future">📅 ${formatDate(date)}</span>`;
+}
+function formatDate(iso) {
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}`;
+}
+
+// ── KANBAN ────────────────────────────────────────────
+let currentView = 'table';
+const KANBAN_COLS = [
+  { key: 'nouveau', label: 'Nouveau', color: '#6366f1' },
+  { key: 'contacte', label: 'Contacté', color: '#f59e0b' },
+  { key: 'interesse', label: 'Intéressé', color: '#10b981' },
+  { key: 'en_cours', label: 'En cours', color: '#3b82f6' },
+  { key: 'signe', label: 'Signé 🎉', color: '#059669' },
+  { key: 'perdu', label: 'Perdu', color: '#dc2626' },
+];
+
+function setView(view) {
+  currentView = view;
+  document.getElementById('table-wrap').style.display = view === 'table' ? '' : 'none';
+  const kw = document.getElementById('kanban-wrap');
+  kw.classList.toggle('visible', view === 'kanban');
+  document.getElementById('btn-view-table').classList.toggle('active', view === 'table');
+  document.getElementById('btn-view-kanban').classList.toggle('active', view === 'kanban');
+  if (view === 'kanban') renderKanban(prospects);
+}
+
+function renderKanban(data) {
+  const wrap = document.getElementById('kanban-wrap');
+  if (!wrap.classList.contains('visible')) return;
+  wrap.innerHTML = KANBAN_COLS.map(col => {
+    const cards = data.filter(p => p.statut === col.key);
+    return `
+    <div class="kanban-col">
+      <div class="kanban-col-header" style="border-top:3px solid ${col.color}">
+        <span>${col.label}</span>
+        <span style="background:${col.color}20;color:${col.color};padding:1px 7px;border-radius:10px;font-size:10px">${cards.length}</span>
+      </div>
+      <div class="kanban-col-body">
+        ${cards.length === 0 ? '<div style="text-align:center;color:#a8a29e;font-size:12px;padding:16px">Vide</div>' : ''}
+        ${cards.map(p => `
+          <div class="kanban-card">
+            <div class="kanban-card-name">${esc(p.nom)}</div>
+            ${p.entreprise ? `<div class="kanban-card-meta">${esc(p.entreprise)}</div>` : ''}
+            <div class="kanban-card-meta" style="margin-top:3px">
+              ${p.telephone ? `<a href="tel:${esc(p.telephone)}" style="color:#0369a1;text-decoration:none">📞</a> ` : ''}
+              ${p.email ? `<a href="mailto:${esc(p.email)}" style="color:#5b21b6;text-decoration:none">✉</a> ` : ''}
+              ${p.ville ? `· ${esc(p.ville)}` : ''}
+              ${rappelBadge(p.rappel_le)}
+            </div>
+            ${scoreHtml(p.score || computeScore(p))}
+            <div class="kanban-card-actions">
+              ${KANBAN_COLS.filter(c => c.key !== col.key).slice(0,2).map(c =>
+                `<button onclick="updateStatut('${p.id}','${c.key}')" style="font-size:10px;padding:3px 7px;border:1px solid #e7e5e4;background:#fff;border-radius:5px;cursor:pointer" title="→ ${c.label}">→ ${c.label}</button>`
+              ).join('')}
+              <button onclick="openCallModal('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.notes||')}')" style="font-size:10px;padding:3px 7px;border:1px solid #e7e5e4;background:#fff;border-radius:5px;cursor:pointer">📞</button>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── EXPORT CSV ────────────────────────────────────────
+function exportCsv() {
+  const data = prospects;
+  const cols = ['nom','entreprise','secteur','email','telephone','ville','statut','source','notes','rappel_le','created_at'];
+  const header = cols.join(';');
+  const rows = data.map(p => cols.map(c => `"${(p[c]||'').toString().replace(/"/g,'""')}"`).join(';'));
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `prospects-locamaster-${TODAY}.csv`;
+  a.click();
+  showToast('Export téléchargé', 'success');
+}
+
 document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 document.getElementById('import-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeImportModal(); });
 document.getElementById('call-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCallModal(); });
@@ -932,6 +1102,13 @@ function selectCallResult(el, value) {
   document.querySelectorAll('.call-opt').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   callSelectedResult = value;
+  // Afficher le date picker seulement pour "À rappeler"
+  document.getElementById('call-rappel-wrap').style.display = value === 'rappeler' ? '' : 'none';
+  if (value === 'rappeler') {
+    // Proposer dans 5 jours par défaut
+    const d = new Date(); d.setDate(d.getDate() + 5);
+    document.getElementById('call-rappel-date').value = d.toISOString().split('T')[0];
+  }
 }
 
 async function saveCall() {
@@ -944,8 +1121,12 @@ async function saveCall() {
   const callEntry = `📞 Appel ${date} · ${label}${extraNote ? ` · ${extraNote}` : ''}`;
   const newNotes = existingNotes ? existingNotes + '\n' + callEntry : callEntry;
 
+  const rappelDate = callSelectedResult === 'rappeler'
+    ? document.getElementById('call-rappel-date').value || null
+    : null;
   const updates = { id, notes: newNotes };
   if (CALL_STATUT[callSelectedResult]) updates.statut = CALL_STATUT[callSelectedResult];
+  if (rappelDate) updates.rappel_le = rappelDate;
 
   try {
     const res = await fetch(apiUrl('/api/prospects'), {
@@ -957,6 +1138,7 @@ async function saveCall() {
     if (idx !== -1) {
       prospects[idx].notes = newNotes;
       if (updates.statut) prospects[idx].statut = updates.statut;
+      if (rappelDate) prospects[idx].rappel_le = rappelDate;
     }
     closeCallModal();
     renderTable(prospects);

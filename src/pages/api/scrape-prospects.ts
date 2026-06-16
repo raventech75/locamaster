@@ -73,7 +73,7 @@ async function fetchFromOutscraper(query: string, limit: number, apiKey: string)
     limit: String(limit),
     language: 'fr',
     region: 'FR',
-    fields: 'name,full_address,phone,site,emails_from_website,social_networks',
+    fields: 'name,full_address,phone,site,emails_from_website,social_networks,rating,reviews',
     async: 'false',
   });
   const res = await fetch(`https://api.app.outscraper.com/maps/search-v3?${params}`, {
@@ -148,6 +148,15 @@ export const POST: APIRoute = async ({ request }) => {
         ? '33' + phone.replace(/[\s\-\.]/g, '').replace(/^\+33/, '').replace(/^0/, '')
         : null;
 
+      const rating = (p.rating as number) || null;
+      const reviews = (p.reviews as number) || 0;
+      // Score 1-5 : fort besoin = note faible + pas de site + peu d'avis
+      const score = Math.min(5, Math.max(1,
+        (rating && rating < 4.0 ? 2 : 0) +
+        (!websiteUrl ? 2 : 0) +
+        (!email ? 1 : 0) +
+        (reviews < 30 ? 1 : 0)
+      ));
       return {
         nom: (p.name as string) || '',
         entreprise: (p.name as string) || '',
@@ -160,6 +169,9 @@ export const POST: APIRoute = async ({ request }) => {
         facebook: socials.facebook || null,
         source: 'google-maps',
         secteur: secteurNorm,
+        note_google: rating,
+        reviews,
+        score,
       };
     })
   );
