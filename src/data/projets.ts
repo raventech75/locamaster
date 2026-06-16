@@ -83,7 +83,6 @@ export const projets: Projet[] = [
       "Des visuels qui crédibilisent immédiatement le positionnement premium. Première vente internationale directe via Instagram.",
     livrables: ["1 film vitrine 2 min", "30 photos produit", "2 vidéos courtes", "Identité Instagram"],
     imageCover: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     pack: "Pack sur-mesure",
     dateAnnee: 2025,
     featured: true,

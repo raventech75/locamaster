@@ -6,6 +6,7 @@ import '@fontsource-variable/bricolage-grotesque';
 import '../styles/global.css';
 import { ViewTransitions } from 'astro:transitions';
 import FloatingContact from '../components/FloatingContact.astro';
+import StickyMobileBar from '../components/StickyMobileBar.astro';
 
 interface Props {
   title: string;
@@ -130,6 +131,7 @@ const fullTitle = title === 'Locamaster' ? title : `${title} — Locamaster`;
     <slot />
 
     <FloatingContact />
+    <StickyMobileBar />
 
     <!-- Système d'animation luxe (GSAP + Lenis + loader + rideau) -->
     <script>
