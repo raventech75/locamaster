@@ -48,8 +48,8 @@ export const packs: Pack[] = [
     badge: 'Le plus demandé',
   },
   {
-    id: 'premium-artisan',
-    nom: 'Premium Artisan',
+    id: 'premium-pro',
+    nom: 'Premium Pro',
     tarif: 4500,
     tarifLancement: 4000,
     livrables: [

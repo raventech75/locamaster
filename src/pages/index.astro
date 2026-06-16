@@ -15,24 +15,25 @@ import PortfolioPreview from '../sections/PortfolioPreview.astro';
 import CasUsage from '../sections/CasUsage.astro';
 import FAQ from '../sections/FAQ.astro';
 import CTAFinale from '../sections/CTAFinale.astro';
+import Temoignages from '../sections/Temoignages.astro';
 
 const schema = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "Locamaster — Branding, photo et vidéo pour artisans en Île-de-France",
-  "description": "Studio visuel solo pour artisans et PME locales. Photo pro, vidéos réseaux, branding complet. Île-de-France.",
+  "name": "Locamaster — Branding, photo et vidéo pour les commerces locaux en Île-de-France",
+  "description": "Studio visuel solo pour restaurateurs, fleuristes, libraires, coiffeurs et tous les professionnels locaux. Photo pro, vidéos réseaux, branding complet. Île-de-France.",
   "url": "https://locamaster.fr",
   "mainEntity": {
     "@type": "LocalBusiness",
     "name": "Locamaster",
-    "description": "Branding, photo et vidéo pour artisans et entreprises locales en Île-de-France.",
+    "description": "Branding, photo et vidéo pour les commerces et professionnels locaux en Île-de-France.",
   }
 };
 ---
 
 <BaseLayout
-  title="Locamaster — Branding, photo et vidéo pour artisans en Île-de-France"
-  description="Studio visuel solo pour artisans et entreprises locales. Photo professionnelle, vidéos réseaux sociaux, branding complet. Île-de-France."
+  title="Locamaster — Branding, photo et vidéo pour les commerces locaux en Île-de-France"
+  description="Studio visuel solo pour restaurateurs, fleuristes, libraires, coiffeurs et tous les professionnels locaux. Photo professionnelle, vidéos réseaux sociaux, branding complet. Île-de-France."
   schema={schema}
 >
   <Navigation variant="transparent" />
@@ -46,6 +47,7 @@ const schema = {
     <Process />
     <PourquoiLocamaster />
     <PortfolioPreview />
+    <Temoignages />
     <Offres />
     <CasUsage />
     <FAQ />

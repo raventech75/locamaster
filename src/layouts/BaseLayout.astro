@@ -5,6 +5,7 @@ import '@fontsource-variable/inter';
 import '@fontsource-variable/bricolage-grotesque';
 import '../styles/global.css';
 import { ViewTransitions } from 'astro:transitions';
+import FloatingContact from '../components/FloatingContact.astro';
 
 interface Props {
   title: string;
@@ -127,6 +128,8 @@ const fullTitle = title === 'Locamaster' ? title : `${title} — Locamaster`;
     </div>
 
     <slot />
+
+    <FloatingContact />
 
     <!-- Système d'animation luxe (GSAP + Lenis + loader + rideau) -->
     <script>
