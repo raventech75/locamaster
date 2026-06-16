@@ -1005,10 +1005,11 @@ function showToast(msg, type = '') {
 // ── SCORE ─────────────────────────────────────────────
 function computeScore(p) {
   let s = 0;
-  if (!p.email) s += 2;
-  if (!p.website && !p.notes?.includes('↗')) s += 1;
-  if (p.telephone) s += 1;
-  if (countCalls(p.notes) === 0) s += 1;
+  const ng = parseFloat(p.note_google);
+  if (ng >= 4.0) s += 2; else if (ng >= 3.5) s += 1; // bonne note = budget + sérieux
+  if (!p.email) s += 1;      // pas d'email = gap digital
+  if (!p.website) s += 2;    // pas de site = gap à combler
+  if (p.telephone) s += 1;   // a un téléphone = joignable
   return Math.min(5, Math.max(1, s));
 }
 function noteGoogleHtml(note) {

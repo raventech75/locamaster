@@ -150,12 +150,12 @@ export const POST: APIRoute = async ({ request }) => {
 
       const rating = (p.rating as number) || null;
       const reviews = (p.reviews as number) || 0;
-      // Score 1-5 : fort besoin = note faible + pas de site + peu d'avis
+      // Score 1-5 : bon prospect = établissement sérieux (note haute) + gaps visuels (pas de site/email)
       const score = Math.min(5, Math.max(1,
-        (rating && rating < 4.0 ? 2 : 0) +
-        (!websiteUrl ? 2 : 0) +
-        (!email ? 1 : 0) +
-        (reviews < 30 ? 1 : 0)
+        (rating && rating >= 4.0 ? 2 : rating && rating >= 3.5 ? 1 : 0) + // bonne note = budget + sérieux
+        (!websiteUrl ? 2 : 0) +  // pas de site = gap à combler
+        (!email ? 1 : 0) +       // pas d'email = contenu digital manquant
+        (reviews >= 20 ? 1 : 0)  // assez d'avis = établissement actif
       ));
       return {
         nom: (p.name as string) || '',
