@@ -9,7 +9,8 @@ async function getSupabase() {
   const key = getEnv('SUPABASE_SERVICE_ROLE_KEY');
   if (!url || !key) throw new Error(`Supabase non configuré — URL:${!!url} KEY:${!!key}`);
   const { createClient } = await import('@supabase/supabase-js');
-  return createClient(url, key, { auth: { persistSession: false } });
+  const { default: ws } = await import('ws');
+  return createClient(url, key, { auth: { persistSession: false }, realtime: { transport: ws } });
 }
 
 function unauthorized() {
