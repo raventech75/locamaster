@@ -53,11 +53,13 @@ import CTAFinale from '../sections/CTAFinale.astro';
           <!-- Photo profil -->
           <div class="relative">
             <div class="aspect-[3/4] rounded-2xl overflow-hidden bg-surface border border-border max-w-sm mx-auto lg:mx-0">
-              <!-- Placeholder photo — remplacer par une vraie photo du fondateur -->
+              <!-- Photo du fondateur — déposer le fichier dans public/images/founder.jpg -->
               <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80&auto=format"
-                alt="Fondateur de Locamaster en tournage"
-                class="w-full h-full object-cover"
+                src="/images/founder.jpg"
+                alt="Le fondateur de Locamaster"
+                class="w-full h-full object-cover object-center"
+                width="600"
+                height="800"
                 loading="eager"
               />
             </div>
