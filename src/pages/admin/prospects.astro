@@ -1,7 +1,6 @@
 ---
 export const prerender = false;
 
-// Protection simple par token en query param
 const token = Astro.url.searchParams.get('token');
 const adminToken = process.env.ADMIN_TOKEN ?? import.meta.env.ADMIN_TOKEN;
 
@@ -22,7 +21,6 @@ if (!adminToken || token !== adminToken) {
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #f5f5f4; color: #1c1917; font-size: 14px; min-height: 100vh; }
 
-    /* Layout */
     .topbar { background: #1c1917; color: #fff; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
     .topbar-brand { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
     .topbar-brand span { background: #f59e0b; color: #1c1917; width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
@@ -39,6 +37,26 @@ if (!adminToken || token !== adminToken) {
     .stat.s-interesse .stat-value { color: #10b981; }
     .stat.s-signe .stat-value { color: #059669; }
 
+    /* Finder panel */
+    .finder { background: #fff; border: 1px solid #e7e5e4; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; }
+    .finder-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .finder-toggle h3 { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .finder-toggle .badge-new { background: #fef3c7; color: #92400e; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+    .finder-body { margin-top: 16px; display: none; }
+    .finder-body.open { display: block; }
+    .finder-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+    .finder-row .fg { display: flex; flex-direction: column; gap: 4px; }
+    .finder-row label { font-size: 11px; font-weight: 600; color: #57534e; text-transform: uppercase; letter-spacing: .04em; }
+    .finder-row select, .finder-row input { border: 1px solid #d6d3d1; border-radius: 8px; padding: 8px 11px; font-size: 13px; outline: none; background: #fff; }
+    .finder-row select:focus, .finder-row input:focus { border-color: #f59e0b; }
+    .finder-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .finder-link { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; border: 1px solid #d6d3d1; background: #fff; color: #1c1917; transition: background .15s; cursor: pointer; }
+    .finder-link:hover { background: #fafaf9; }
+    .finder-link.maps { background: #e8f5e9; border-color: #a5d6a7; color: #1b5e20; }
+    .finder-link.insta { background: #fce4ec; border-color: #f48fb1; color: #880e4f; }
+    .finder-link.pages { background: #e3f2fd; border-color: #90caf9; color: #0d47a1; }
+    .finder-tip { margin-top: 12px; font-size: 12px; color: #78716c; background: #fafaf9; border-radius: 8px; padding: 10px 14px; line-height: 1.6; }
+
     /* Toolbar */
     .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
     .toolbar select, .toolbar input { border: 1px solid #d6d3d1; border-radius: 8px; padding: 8px 12px; font-size: 13px; background: #fff; outline: none; }
@@ -52,6 +70,8 @@ if (!adminToken || token !== adminToken) {
     .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
     .btn-email { background: #dbeafe; color: #1d4ed8; }
     .btn-email.sent { background: #d1fae5; color: #065f46; cursor: default; opacity: .7; }
+    .btn-relance { background: #fef3c7; color: #92400e; }
+    .btn-import { background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
 
     /* Table */
     .table-wrap { background: #fff; border: 1px solid #e7e5e4; border-radius: 12px; overflow: hidden; }
@@ -80,17 +100,25 @@ if (!adminToken || token !== adminToken) {
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .form-col2 { grid-column: span 2; }
     label { display: block; font-size: 12px; font-weight: 600; color: #57534e; margin-bottom: 4px; }
-    input[type=text], input[type=email], input[type=tel], select, textarea { width: 100%; border: 1px solid #d6d3d1; border-radius: 8px; padding: 9px 11px; font-size: 13px; outline: none; font-family: inherit; }
+    input[type=text], input[type=email], input[type=tel], input[type=file], select, textarea { width: 100%; border: 1px solid #d6d3d1; border-radius: 8px; padding: 9px 11px; font-size: 13px; outline: none; font-family: inherit; }
     input:focus, select:focus, textarea:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.15); }
     textarea { resize: vertical; min-height: 72px; }
     .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
 
-    /* Notes inline */
-    .notes-cell { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #78716c; font-size: 12px; }
-    .actions { display: flex; gap: 6px; }
+    /* CSV modal */
+    .csv-modal { max-width: 560px; }
+    .csv-format { background: #f5f5f4; border-radius: 8px; padding: 10px 14px; font-size: 12px; font-family: monospace; margin-bottom: 12px; color: #57534e; line-height: 1.8; }
+    .csv-preview { margin-top: 12px; }
+    .csv-preview table { font-size: 12px; }
+    .csv-preview th { font-size: 10px; }
+    .csv-count { font-size: 12px; color: #78716c; margin-top: 8px; }
+    .progress-bar { height: 6px; background: #e7e5e4; border-radius: 3px; margin-top: 12px; overflow: hidden; display: none; }
+    .progress-bar-fill { height: 100%; background: #f59e0b; width: 0%; transition: width .3s; }
 
-    /* Toast */
-    .toast { position: fixed; bottom: 20px; right: 20px; background: #1c1917; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 300; transform: translateY(20px); opacity: 0; transition: all .25s; pointer-events: none; }
+    .notes-cell { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #78716c; font-size: 12px; }
+    .actions { display: flex; gap: 4px; flex-wrap: wrap; }
+
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #1c1917; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 300; transform: translateY(20px); opacity: 0; transition: all .25s; pointer-events: none; max-width: 320px; }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { background: #065f46; }
     .toast.error { background: #991b1b; }
@@ -117,6 +145,47 @@ if (!adminToken || token !== adminToken) {
     <div class="stat s-signe"><div class="stat-value" id="s-signe">—</div><div class="stat-label">Signés</div></div>
   </div>
 
+  <!-- Finder panel -->
+  <div class="finder">
+    <div class="finder-toggle" onclick="toggleFinder()">
+      <h3>🔍 Trouver des prospects <span class="badge-new">Nouveau</span></h3>
+      <span id="finder-arrow">▼</span>
+    </div>
+    <div class="finder-body" id="finder-body">
+      <div class="finder-row">
+        <div class="fg">
+          <label>Secteur</label>
+          <select id="fd-secteur">
+            <option value="restaurateurs">Restaurateurs</option>
+            <option value="fleuristes">Fleuristes</option>
+            <option value="coiffeurs">Coiffeurs</option>
+            <option value="boulangeries">Boulangeries</option>
+            <option value="antiquaires">Antiquaires</option>
+            <option value="librairies">Librairies</option>
+            <option value="architectes">Architectes</option>
+            <option value="photographes">Photographes</option>
+            <option value="commerces de proximité">Commerces de proximité</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Ville / Arrondissement</label>
+          <input type="text" id="fd-ville" value="Paris" placeholder="Paris 11e, Vincennes…" />
+        </div>
+        <button class="btn btn-primary" onclick="openFinderLinks()">Générer les liens →</button>
+      </div>
+      <div class="finder-links" id="finder-links" style="display:none">
+        <a id="fl-maps" class="finder-link maps" target="_blank" rel="noopener">🗺 Google Maps</a>
+        <a id="fl-pages" class="finder-link pages" target="_blank" rel="noopener">📋 Pages Jaunes</a>
+        <a id="fl-insta" class="finder-link insta" target="_blank" rel="noopener">📷 Instagram</a>
+        <button class="finder-link" onclick="copyScript()">📋 Copier script cold email</button>
+      </div>
+      <div class="finder-tip">
+        💡 <strong>Méthode rapide :</strong> Ouvre Google Maps → copie nom + adresse + email depuis la fiche → ajoute le prospect ici ou importe un CSV.<br>
+        Sur <strong>Pages Jaunes</strong> tu trouves souvent l'email directement. Sur <strong>Instagram</strong> cherche le secteur + ville dans la bio.
+      </div>
+    </div>
+  </div>
+
   <!-- Toolbar -->
   <div class="toolbar">
     <input type="text" id="search" placeholder="🔍 Rechercher nom, entreprise, ville…" oninput="filterTable()" />
@@ -141,7 +210,8 @@ if (!adminToken || token !== adminToken) {
       <option value="coach">Coach / Thérapeute</option>
       <option value="autre">Autre</option>
     </select>
-    <button class="btn btn-primary" onclick="openModal()">+ Ajouter un prospect</button>
+    <button class="btn btn-primary" onclick="openModal()">+ Ajouter</button>
+    <button class="btn btn-import" onclick="openImportModal()">⬆ Importer CSV</button>
     <button class="btn btn-ghost" onclick="loadProspects()">↻ Actualiser</button>
   </div>
 
@@ -224,10 +294,11 @@ if (!adminToken || token !== adminToken) {
         <select id="f-source">
           <option value="manuel">Manuel</option>
           <option value="google-maps">Google Maps</option>
+          <option value="pages-jaunes">Pages Jaunes</option>
           <option value="instagram">Instagram</option>
           <option value="linkedin">LinkedIn</option>
           <option value="referral">Bouche à oreille</option>
-          <option value="phantom">Phantombuster</option>
+          <option value="csv">Import CSV</option>
         </select>
       </div>
       <div class="form-col2">
@@ -242,12 +313,39 @@ if (!adminToken || token !== adminToken) {
   </div>
 </div>
 
+<!-- Modal import CSV -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal csv-modal">
+    <h2>⬆ Importer des prospects (CSV)</h2>
+    <p style="font-size:12px;color:#78716c;margin-bottom:12px">Colonnes attendues (séparateur : virgule ou point-virgule) :</p>
+    <div class="csv-format">
+      nom ; entreprise ; secteur ; email ; telephone ; ville<br>
+      <span style="color:#a8a29e">Jean Dupont ; Le Bistrot ; restaurateur ; contact@bistrot.fr ; 06 12 34 56 78 ; Paris 11e</span>
+    </div>
+    <div>
+      <label for="csv-file">Fichier CSV</label>
+      <input type="file" id="csv-file" accept=".csv,.txt" onchange="loadCsvFile()" style="margin-bottom:10px" />
+    </div>
+    <div>
+      <label for="csv-text">Ou coller le contenu directement</label>
+      <textarea id="csv-text" style="min-height:100px;font-family:monospace;font-size:12px" placeholder="nom;entreprise;secteur;email;telephone;ville&#10;Jean Dupont;Le Bistrot;restaurateur;contact@bistrot.fr;0612345678;Paris 11e" oninput="previewCsv()"></textarea>
+    </div>
+    <div class="csv-preview" id="csv-preview"></div>
+    <div class="progress-bar" id="import-progress"><div class="progress-bar-fill" id="import-progress-fill"></div></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeImportModal()">Annuler</button>
+      <button class="btn btn-primary" id="btn-import-go" onclick="runImport()" disabled>Importer</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <div id="admin-cfg" data-token={token} style="display:none"></div>
 
 <script is:inline>
 const token = document.getElementById('admin-cfg').dataset.token;
 let prospects = [];
+let csvRows = [];
 
 const STATUT_LABELS = {
   nouveau: 'Nouveau', contacte: 'Contacté', interesse: 'Intéressé',
@@ -260,10 +358,9 @@ const SECTEUR_LABELS = {
   architecte: '📐 Architecte', coach: '🧘 Coach', autre: '👤 Autre',
 };
 
-function apiUrl(path) {
-  return `${path}?token=${token}`;
-}
+function apiUrl(path) { return `${path}?token=${token}`; }
 
+// ── LOAD ──────────────────────────────────────────────
 async function loadProspects() {
   try {
     const res = await fetch(apiUrl('/api/prospects'));
@@ -271,9 +368,7 @@ async function loadProspects() {
     renderTable(prospects);
     updateStats(prospects);
     document.getElementById('last-update').textContent = 'Mis à jour à ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-  } catch (e) {
-    showToast('Erreur de chargement', 'error');
-  }
+  } catch (e) { showToast('Erreur de chargement', 'error'); }
 }
 
 function updateStats(data) {
@@ -284,6 +379,7 @@ function updateStats(data) {
   });
 }
 
+// ── FILTER ────────────────────────────────────────────
 function filterTable() {
   const q = document.getElementById('search').value.toLowerCase();
   const statut = document.getElementById('filter-statut').value;
@@ -297,13 +393,28 @@ function filterTable() {
   renderTable(filtered);
 }
 
+// ── RENDER ────────────────────────────────────────────
+function daysSince(dateStr) {
+  if (!dateStr) return 999;
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+}
+
 function renderTable(data) {
   const tbody = document.getElementById('tbody');
   if (!data.length) {
     tbody.innerHTML = '<tr><td colspan="7" class="empty">Aucun prospect trouvé</td></tr>';
     return;
   }
-  tbody.innerHTML = data.map(p => `
+  tbody.innerHTML = data.map(p => {
+    const canRelance = p.email && p.email_envoye && p.statut === 'contacte' && daysSince(p.email_envoye_at) >= 4;
+    const emailBtn = p.email
+      ? (p.email_envoye
+        ? (canRelance
+          ? `<button class="btn btn-sm btn-relance" onclick="sendRelance('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.email)}','${p.secteur||''}')">↩ Relancer</button>`
+          : `<button class="btn btn-sm btn-email sent" disabled title="Email envoyé il y a ${daysSince(p.email_envoye_at)}j">✓ Envoyé</button>`)
+        : `<button class="btn btn-sm btn-email" onclick="sendEmail('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.email)}','${p.secteur||''}')">✉ Email</button>`)
+      : '';
+    return `
     <tr>
       <td>
         <div style="font-weight:600;font-size:13px">${esc(p.nom)}</div>
@@ -324,21 +435,20 @@ function renderTable(data) {
       <td class="notes-cell" title="${esc(p.notes || '')}">${p.notes ? esc(p.notes) : '<span style="color:#a8a29e">—</span>'}</td>
       <td>
         <div class="actions">
-          ${p.email ? `<button class="btn btn-sm btn-email ${p.email_envoye?'sent':''}" onclick="${p.email_envoye?'':(`sendEmail('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.email)}','${p.secteur||''}')`)}" title="${p.email_envoye?'Email déjà envoyé':'Envoyer email de prospection'}">
-            ${p.email_envoye ? '✓ Envoyé' : '✉ Email'}
-          </button>` : ''}
+          ${emailBtn}
           <button class="btn btn-sm btn-ghost" onclick="openEdit('${p.id}')">Éditer</button>
           <button class="btn btn-sm btn-danger" onclick="deleteProspect('${p.id}')">✕</button>
         </div>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 }
 
 function esc(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+// ── ACTIONS ───────────────────────────────────────────
 async function updateStatut(id, statut) {
   try {
     await fetch(apiUrl('/api/prospects'), {
@@ -357,14 +467,37 @@ async function sendEmail(id, nom, entreprise, email, secteur) {
   try {
     const res = await fetch(apiUrl('/api/send-prospect-email'), {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prospectId: id, nom, entreprise, email, secteur }),
+      body: JSON.stringify({ prospectId: id, nom, entreprise, email, secteur, type: 'prospection' }),
     });
     if (!res.ok) throw new Error((await res.json()).error);
     const p = prospects.find(x => x.id === id);
-    if (p) { p.email_envoye = true; p.statut = 'contacte'; }
+    if (p) { p.email_envoye = true; p.email_envoye_at = new Date().toISOString(); p.statut = 'contacte'; }
     renderTable(prospects);
     updateStats(prospects);
     showToast(`Email envoyé à ${nom} !`, 'success');
+  } catch (e) { showToast('Erreur : ' + e.message, 'error'); }
+}
+
+async function sendRelance(id, nom, entreprise, email, secteur) {
+  if (!confirm(`Envoyer un email de relance à ${nom} (${email}) ?`)) return;
+  try {
+    const res = await fetch(apiUrl('/api/send-prospect-email'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prospectId: id, nom, entreprise, email, secteur, type: 'relance' }),
+    });
+    if (!res.ok) throw new Error((await res.json()).error);
+    const p = prospects.find(x => x.id === id);
+    if (p) {
+      p.email_envoye_at = new Date().toISOString();
+      const note = `Relance envoyée le ${new Date().toLocaleDateString('fr-FR')}`;
+      p.notes = p.notes ? p.notes + ' · ' + note : note;
+      await fetch(apiUrl('/api/prospects'), {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, notes: p.notes, email_envoye_at: p.email_envoye_at }),
+      });
+    }
+    renderTable(prospects);
+    showToast(`Relance envoyée à ${nom} !`, 'success');
   } catch (e) { showToast('Erreur : ' + e.message, 'error'); }
 }
 
@@ -382,6 +515,7 @@ async function deleteProspect(id) {
   } catch (e) { showToast('Erreur', 'error'); }
 }
 
+// ── MODAL AJOUT / ÉDITION ────────────────────────────
 function openModal() {
   document.getElementById('modal-title').textContent = 'Ajouter un prospect';
   ['id','nom','entreprise','email','telephone','ville','notes'].forEach(f => {
@@ -410,9 +544,7 @@ function openEdit(id) {
   document.getElementById('modal').classList.add('open');
 }
 
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
 async function saveProspect() {
   const id = document.getElementById('f-id').value;
@@ -452,16 +584,130 @@ async function saveProspect() {
   } catch (e) { showToast('Erreur lors de la sauvegarde', 'error'); }
 }
 
+// ── FINDER ────────────────────────────────────────────
+function toggleFinder() {
+  const body = document.getElementById('finder-body');
+  const arrow = document.getElementById('finder-arrow');
+  body.classList.toggle('open');
+  arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function openFinderLinks() {
+  const secteur = document.getElementById('fd-secteur').value;
+  const ville = document.getElementById('fd-ville').value || 'Paris';
+  const q = encodeURIComponent(`${secteur} ${ville}`);
+  document.getElementById('fl-maps').href = `https://www.google.com/maps/search/${q}`;
+  document.getElementById('fl-pages').href = `https://www.pagesjaunes.fr/annuaire/chercherlespros?quoiqui=${encodeURIComponent(secteur)}&ou=${encodeURIComponent(ville)}`;
+  document.getElementById('fl-insta').href = `https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent(secteur + ' ' + ville)}`;
+  document.getElementById('finder-links').style.display = 'flex';
+}
+
+function copyScript() {
+  const secteur = document.getElementById('fd-secteur').value;
+  const ville = document.getElementById('fd-ville').value || 'Paris';
+  const script = `Bonjour,\n\nJ'ai découvert votre établissement en cherchant des ${secteur} à ${ville}.\n\nJe suis Feridun, photographe et vidéaste professionnel. Je propose une Session Découverte à 190 € HT : une intervention chez vous, 5 photos retouchées + 1 vidéo courte livrées en 5 jours.\n\nDisponible pour un appel de 15 minutes cette semaine ?\n\nFeridun Kizgin — Locamaster\n01 85 09 45 42`;
+  navigator.clipboard.writeText(script).then(() => showToast('Script copié dans le presse-papier !', 'success'));
+}
+
+// ── IMPORT CSV ────────────────────────────────────────
+const CSV_COLS = ['nom','entreprise','secteur','email','telephone','ville'];
+
+function parseCsv(text) {
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const first = lines[0].toLowerCase();
+  const hasHeader = CSV_COLS.some(c => first.includes(c));
+  const dataLines = hasHeader ? lines.slice(1) : lines;
+  return dataLines.map(line => {
+    const parts = line.split(sep).map(s => s.trim().replace(/^["']|["']$/g,''));
+    const row = {};
+    CSV_COLS.forEach((col, i) => { row[col] = parts[i] || ''; });
+    return row;
+  }).filter(r => r.nom);
+}
+
+function loadCsvFile() {
+  const file = document.getElementById('csv-file').files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('csv-text').value = e.target.result;
+    previewCsv();
+  };
+  reader.readAsText(file);
+}
+
+function previewCsv() {
+  const text = document.getElementById('csv-text').value;
+  if (!text.trim()) { csvRows = []; document.getElementById('csv-preview').innerHTML = ''; document.getElementById('btn-import-go').disabled = true; return; }
+  csvRows = parseCsv(text);
+  const btn = document.getElementById('btn-import-go');
+  if (!csvRows.length) {
+    document.getElementById('csv-preview').innerHTML = '<p style="color:#dc2626;font-size:12px;margin-top:8px">Aucune ligne valide détectée.</p>';
+    btn.disabled = true;
+    return;
+  }
+  const preview = csvRows.slice(0, 3);
+  document.getElementById('csv-preview').innerHTML = `
+    <div class="csv-count">${csvRows.length} prospect(s) détecté(s) — aperçu des 3 premiers :</div>
+    <div class="table-wrap" style="margin-top:8px">
+      <table>
+        <thead><tr>${CSV_COLS.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+        <tbody>${preview.map(r=>`<tr>${CSV_COLS.map(c=>`<td>${esc(r[c])}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+  btn.disabled = false;
+}
+
+function openImportModal() {
+  document.getElementById('csv-file').value = '';
+  document.getElementById('csv-text').value = '';
+  document.getElementById('csv-preview').innerHTML = '';
+  document.getElementById('btn-import-go').disabled = true;
+  document.getElementById('import-progress').style.display = 'none';
+  csvRows = [];
+  document.getElementById('import-modal').classList.add('open');
+}
+
+function closeImportModal() { document.getElementById('import-modal').classList.remove('open'); }
+
+async function runImport() {
+  if (!csvRows.length) return;
+  const btn = document.getElementById('btn-import-go');
+  btn.disabled = true;
+  btn.textContent = 'Import en cours…';
+  const bar = document.getElementById('import-progress');
+  const fill = document.getElementById('import-progress-fill');
+  bar.style.display = 'block';
+  let ok = 0, fail = 0;
+  for (let i = 0; i < csvRows.length; i++) {
+    const row = { ...csvRows[i], statut: 'nouveau', source: 'csv' };
+    try {
+      const res = await fetch(apiUrl('/api/prospects'), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(row),
+      });
+      if (res.ok) { ok++; const created = await res.json(); prospects.unshift(created); }
+      else fail++;
+    } catch { fail++; }
+    fill.style.width = Math.round(((i+1)/csvRows.length)*100) + '%';
+  }
+  closeImportModal();
+  renderTable(prospects);
+  updateStats(prospects);
+  showToast(`${ok} prospect(s) importé(s)${fail ? `, ${fail} erreur(s)` : ''}`, ok ? 'success' : 'error');
+}
+
+// ── TOAST ─────────────────────────────────────────────
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show ' + type;
-  setTimeout(() => { t.className = 'toast'; }, 3000);
+  setTimeout(() => { t.className = 'toast'; }, 3500);
 }
 
-document.getElementById('modal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeModal();
-});
+document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.getElementById('import-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeImportModal(); });
 
 loadProspects();
 </script>

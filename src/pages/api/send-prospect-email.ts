@@ -11,6 +11,29 @@ function checkToken(request: Request): boolean {
   return !!adminToken && token === adminToken;
 }
 
+const relanceTemplates: Record<string, { sujet: string; html: (nom: string, entreprise: string) => string }> = {
+  restaurateur: {
+    sujet: `Re : vos photos — je n'ai pas eu de nouvelles`,
+    html: (nom, entreprise) => `
+<p>Bonjour ${nom},</p>
+<p>Je me permets de revenir vers vous concernant <strong>${entreprise}</strong>.</p>
+<p>Je sais que vous êtes probablement débordé entre les services et la gestion du quotidien — c'est exactement pourquoi je propose une intervention courte, en dehors des heures de rush, sans perturber votre équipe.</p>
+<p>La <strong>Session Découverte à 190 € HT</strong> est souvent rentabilisée dès la première semaine si les photos font monter les réservations en ligne.</p>
+<p>Si ce n'est pas le bon moment, dites-le moi et je ne vous recontacte plus. Sinon, 15 minutes d'appel suffisent pour voir si ça vaut le coup.</p>
+<p>Cordialement,<br>Feridun Kizgin<br>Locamaster — 01 85 09 45 42</p>`,
+  },
+  default: {
+    sujet: `Re : votre image professionnelle — une dernière fois`,
+    html: (nom, entreprise) => `
+<p>Bonjour ${nom},</p>
+<p>Je reviens vers vous une dernière fois au sujet de <strong>${entreprise}</strong>.</p>
+<p>Je comprends que vous êtes occupé — je le suis aussi. C'est pourquoi je vais être direct : si vous cherchez à améliorer votre visibilité sans y passer des semaines, la <strong>Session Découverte à 190 € HT</strong> est le chemin le plus court.</p>
+<p>Résultat livré en 5 jours, sans engagement pour la suite.</p>
+<p>Un simple "pas intéressé" et je ne vous contacte plus. Dans le cas contraire, je suis disponible cette semaine.</p>
+<p>Cordialement,<br>Feridun Kizgin<br>Locamaster — 01 85 09 45 42</p>`,
+  },
+};
+
 const templates: Record<string, { sujet: string; html: (nom: string, entreprise: string) => string }> = {
   restaurateur: {
     sujet: `Vos plats méritent mieux qu'une photo de téléphone`,
@@ -75,7 +98,9 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'RESEND_API_KEY non configuré' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const tpl = templates[secteur] || templates.default;
+    const { type } = body;
+    const tplMap = type === 'relance' ? relanceTemplates : templates;
+    const tpl = tplMap[secteur] || tplMap.default;
     const prenom = nom.split(' ')[0];
 
     const res = await fetch('https://api.resend.com/emails', {
