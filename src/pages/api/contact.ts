@@ -83,13 +83,12 @@ export const POST: APIRoute = async ({ request }) => {
 
     // --------------------------------------------------------
     // 1. SUPABASE — Stockage du lead
-    // Lecture des variables d'env : .env en dev (import.meta.env),
-    // variables Vercel au runtime (process.env).
-    const env = (k: string): string | undefined =>
-      (import.meta.env as Record<string, string | undefined>)[k] ?? process.env[k];
+    // process.env = runtime Vercel ; import.meta.env = build-time Vite (fallback dev)
+    const getEnv = (k: string): string | undefined =>
+      process.env[k] ?? (import.meta.env as Record<string, string | undefined>)[k];
 
-    const SUPABASE_URL = env('PUBLIC_SUPABASE_URL');
-    const SUPABASE_SERVICE_ROLE_KEY = env('SUPABASE_SERVICE_ROLE_KEY');
+    const SUPABASE_URL = getEnv('PUBLIC_SUPABASE_URL');
+    const SUPABASE_SERVICE_ROLE_KEY = getEnv('SUPABASE_SERVICE_ROLE_KEY');
     if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
       try {
         const { createClient } = await import('@supabase/supabase-js');
@@ -107,17 +106,21 @@ export const POST: APIRoute = async ({ request }) => {
     // --------------------------------------------------------
     // 2. MAKE — Webhook pour automatisation
     // --------------------------------------------------------
-    const MAKE_WEBHOOK_URL = env('MAKE_WEBHOOK_URL');
+    const MAKE_WEBHOOK_URL = getEnv('MAKE_WEBHOOK_URL');
+    console.log('[contact] MAKE_WEBHOOK_URL défini :', !!MAKE_WEBHOOK_URL);
     if (MAKE_WEBHOOK_URL) {
       try {
-        await fetch(MAKE_WEBHOOK_URL, {
+        const makeRes = await fetch(MAKE_WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(lead),
         });
+        console.log('[contact] Make webhook status :', makeRes.status);
       } catch (e) {
-        console.error('[contact] Make webhook error:', e);
+        console.error('[contact] Make webhook error :', e);
       }
+    } else {
+      console.warn('[contact] MAKE_WEBHOOK_URL absent — webhook non déclenché');
     }
 
     // --------------------------------------------------------
