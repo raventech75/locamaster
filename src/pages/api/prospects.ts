@@ -33,6 +33,17 @@ export const GET: APIRoute = async ({ request }) => {
   if (!checkToken(request)) return unauthorized();
   try {
     const url = new URL(request.url);
+
+    // Diagnostic : vérifier les env vars
+    const supabaseUrl = getEnv('PUBLIC_SUPABASE_URL');
+    const supabaseKey = getEnv('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !supabaseKey) {
+      return new Response(JSON.stringify({
+        error: 'Variables Supabase manquantes',
+        details: { PUBLIC_SUPABASE_URL: !!supabaseUrl, SUPABASE_SERVICE_ROLE_KEY: !!supabaseKey },
+      }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+
     const supabase = getSupabase();
     let query = supabase.from('prospects').select('*').order('created_at', { ascending: false });
     const statut = url.searchParams.get('statut');
@@ -40,10 +51,15 @@ export const GET: APIRoute = async ({ request }) => {
     if (statut && statut !== 'tous') query = query.eq('statut', statut);
     if (secteur && secteur !== 'tous') query = query.eq('secteur', secteur);
     const { data, error } = await query;
-    if (error) throw error;
-    return new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    if (error) {
+      console.error('[prospects] Supabase error:', error);
+      return new Response(JSON.stringify({ error: error.message, code: error.code }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+    return new Response(JSON.stringify(data ?? []), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error('[prospects] GET error:', msg);
+    return new Response(JSON.stringify({ error: msg }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 };
 
