@@ -49,10 +49,17 @@ export const services: Service[] = [
     icone: "calendar",
   },
   {
-    id: "presence-locale",
-    titre: "Présence locale optimisée",
+    id: "google-business",
+    titre: "Gestion Fiche Google",
     description:
-      "Fiche Google optimisée, photos professionnelles, avis clients — tout ce qu'il faut pour sortir en tête sur votre zone de chalandise.",
+      "Fiche Google optimisée, photos pro intégrées, réponses aux avis, posts mensuels — votre vitrine n°1 gérée activement pour remonter en tête des recherches locales.",
     icone: "map",
+  },
+  {
+    id: "pub-locale",
+    titre: "Publicité digitale locale",
+    description:
+      "Campagnes Google Ads et Meta Ads ciblées sur votre zone de chalandise. Vous apparaissez devant les bons clients, au bon moment, sans gaspiller votre budget.",
+    icone: "target",
   },
 ];
