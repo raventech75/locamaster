@@ -20,6 +20,7 @@
  */
 
 import type { APIRoute } from 'astro';
+import { createClient } from '@supabase/supabase-js';
 
 export const prerender = false; // Cette route est server-side
 
@@ -93,7 +94,6 @@ export const POST: APIRoute = async ({ request }) => {
     const SUPABASE_SERVICE_ROLE_KEY = getEnv('SUPABASE_SERVICE_ROLE_KEY');
     if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
       try {
-        const { createClient } = await import('@supabase/supabase-js');
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
           auth: { persistSession: false },
         });
