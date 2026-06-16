@@ -16,54 +16,11 @@ function json(data: unknown, status = 200) {
   });
 }
 
-const EMAIL_RE = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
-const EMAIL_BLACKLIST = ['sentry','wixpress','example','domain','email','test','noreply','no-reply','support@','info@w','schema','pixel','placeholder'];
-
-async function extractEmail(url: string): Promise<string | null> {
-  try {
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(4000),
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bot)' },
-    });
-    const html = await res.text();
-    // Try mailto links first (more reliable)
-    const mailtoMatch = html.match(/mailto:([^"'?>\s]+)/);
-    if (mailtoMatch) {
-      const email = mailtoMatch[1].split('?')[0].toLowerCase();
-      if (!EMAIL_BLACKLIST.some(b => email.includes(b))) return email;
-    }
-    // Fallback: regex on page text
-    const matches = html.match(EMAIL_RE) || [];
-    for (const email of matches) {
-      const e = email.toLowerCase();
-      if (!EMAIL_BLACKLIST.some(b => e.includes(b)) && e.length < 60) return e;
-    }
-    // Try /contact page
-    if (!url.includes('/contact')) {
-      const base = new URL(url).origin;
-      return extractEmail(base + '/contact');
-    }
-  } catch { /* timeout or fetch error */ }
-  return null;
-}
-
-interface PlaceResult {
-  nom: string;
-  entreprise: string;
-  telephone: string | null;
-  ville: string;
-  website: string | null;
-  email: string | null;
-  source: string;
-  secteur: string;
-  googleMapsUrl: string | null;
-}
-
 export const POST: APIRoute = async ({ request }) => {
   if (!checkToken(request)) return json({ error: 'Non autorisé' }, 401);
 
-  const PLACES_KEY = getEnv('GOOGLE_PLACES_API_KEY');
-  if (!PLACES_KEY) return json({ error: 'GOOGLE_PLACES_API_KEY non configuré dans les variables Vercel' }, 500);
+  const API_KEY = getEnv('OUTSCRAPER_API_KEY');
+  if (!API_KEY) return json({ error: 'OUTSCRAPER_API_KEY non configuré' }, 500);
 
   const body = await request.json();
   const { secteur, ville, max = 10 } = body;
@@ -71,62 +28,52 @@ export const POST: APIRoute = async ({ request }) => {
 
   const query = `${secteur} ${ville}`;
 
-  // Google Places Text Search (New API)
-  const placesRes = await fetch('https://places.googleapis.com/v1/places:searchText', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Goog-Api-Key': PLACES_KEY,
-      'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.googleMapsUri,places.id',
-    },
-    body: JSON.stringify({
-      textQuery: query,
-      languageCode: 'fr',
-      regionCode: 'FR',
-      maxResultCount: Math.min(max, 20),
-    }),
+  const params = new URLSearchParams({
+    query,
+    limit: String(Math.min(max, 20)),
+    language: 'fr',
+    region: 'FR',
+    fields: 'name,full_address,phone,site,emails_from_website,place_id',
+    async: 'false',
   });
 
-  if (!placesRes.ok) {
-    const err = await placesRes.text();
-    return json({ error: `Google Places API: ${err}` }, 500);
+  const res = await fetch(`https://api.app.outscraper.com/maps/search-v3?${params}`, {
+    headers: { 'X-API-KEY': API_KEY },
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    return json({ error: `Outscraper: ${err}` }, 500);
   }
 
-  const placesData = await placesRes.json();
-  const places = placesData.places || [];
+  const data = await res.json();
 
-  // Extract city from formatted address
-  function extractVille(address: string): string {
-    const parts = address.split(',').map((s: string) => s.trim());
-    // Usually: "Rue X, 75011 Paris, France" → "75011 Paris"
-    const cityPart = parts.find((p: string) => /\d{5}/.test(p));
-    return cityPart || ville;
-  }
+  // Outscraper returns data as array of arrays
+  const places: Record<string, unknown>[] = (data.data || []).flat();
 
-  // Fetch emails in parallel with concurrency limit
-  const results: PlaceResult[] = await Promise.all(
-    places.map(async (place: Record<string, unknown>) => {
-      const name = (place.displayName as { text?: string })?.text || '';
-      const address = (place.formattedAddress as string) || '';
-      const phone = (place.nationalPhoneNumber as string) || null;
-      const website = (place.websiteUri as string) || null;
-      const mapsUri = (place.googleMapsUri as string) || null;
+  // Normalize secteur label: "restaurateurs" → "restaurateur"
+  const secteurNorm = secteur.toLowerCase().replace(/s$/, '').replace(/ies$/, 'ie').replace(/eurs$/, 'eur');
 
-      const email = website ? await extractEmail(website) : null;
-
-      return {
-        nom: name,
-        entreprise: name,
-        telephone: phone,
-        ville: extractVille(address),
-        website,
-        email,
-        source: 'google-maps',
-        secteur: secteur.toLowerCase().replace(/s$/, ''), // restaurateurs → restaurateur
-        googleMapsUrl: mapsUri,
-      };
-    })
-  );
+  const results = places.map((p) => {
+    const emails: string[] = (p.emails_from_website as string[]) || [];
+    const email = emails[0] || null;
+    return {
+      nom: (p.name as string) || '',
+      entreprise: (p.name as string) || '',
+      telephone: (p.phone as string) || null,
+      ville: extractVille((p.full_address as string) || '', ville),
+      website: (p.site as string) || null,
+      email,
+      source: 'google-maps',
+      secteur: secteurNorm,
+    };
+  }).filter(r => r.nom);
 
   return json({ results, query });
 };
+
+function extractVille(address: string, fallback: string): string {
+  const parts = address.split(',').map(s => s.trim());
+  const cityPart = parts.find(p => /\d{5}/.test(p));
+  return cityPart || fallback;
+}
