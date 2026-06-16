@@ -233,15 +233,42 @@ if (!adminToken || token !== adminToken) {
         <div class="fg">
           <label>Secteur</label>
           <select id="sc-secteur">
-            <option value="restaurateurs">Restaurateurs</option>
-            <option value="fleuristes">Fleuristes</option>
-            <option value="coiffeurs">Coiffeurs</option>
-            <option value="boulangeries">Boulangeries</option>
-            <option value="antiquaires">Antiquaires</option>
-            <option value="librairies">Librairies</option>
-            <option value="architectes">Architectes</option>
-            <option value="photographes">Photographes</option>
-            <option value="commerces">Commerces de proximité</option>
+            <optgroup label="🍽 Restauration / Commerce">
+              <option value="restaurateurs">Restaurateurs</option>
+              <option value="boulangeries pâtisseries">Boulangeries / Pâtisseries</option>
+              <option value="fleuristes">Fleuristes</option>
+              <option value="coiffeurs">Coiffeurs / Barbiers</option>
+              <option value="instituts de beauté">Instituts de beauté</option>
+              <option value="antiquaires brocantes">Antiquaires / Brocantes</option>
+              <option value="librairies">Librairies</option>
+              <option value="boutiques vêtements">Boutiques vêtements</option>
+              <option value="épiceries fines">Épiceries fines</option>
+            </optgroup>
+            <optgroup label="🏗 BTP / Artisans">
+              <option value="plombiers">Plombiers</option>
+              <option value="électriciens">Électriciens</option>
+              <option value="peintres en bâtiment">Peintres en bâtiment</option>
+              <option value="menuisiers">Menuisiers</option>
+              <option value="carreleurs">Carreleurs</option>
+              <option value="maçons">Maçons</option>
+              <option value="couvreurs">Couvreurs</option>
+              <option value="serruriers">Serruriers</option>
+              <option value="entreprises de rénovation">Entreprises rénovation</option>
+              <option value="architectes d'intérieur">Architectes d'intérieur</option>
+              <option value="décorateurs d'intérieur">Décorateurs d'intérieur</option>
+              <option value="paysagistes">Paysagistes</option>
+            </optgroup>
+            <optgroup label="💼 Services / Libéraux">
+              <option value="photographes">Photographes</option>
+              <option value="agences immobilières">Agences immobilières</option>
+              <option value="coaches sportifs">Coaches sportifs</option>
+              <option value="thérapeutes">Thérapeutes / Ostéopathes</option>
+              <option value="avocats">Avocats</option>
+              <option value="comptables experts comptables">Comptables / Experts-comptables</option>
+              <option value="agences de communication">Agences de communication</option>
+              <option value="auto-écoles">Auto-écoles</option>
+              <option value="garages automobiles">Garages automobiles</option>
+            </optgroup>
           </select>
         </div>
         <div class="fg">

@@ -16,61 +16,7 @@ function json(data: unknown, status = 200) {
   });
 }
 
-// Mots-clés par secteur pour filtrer les résultats hors-sujet
-const SECTEUR_KEYWORDS: Record<string, string[]> = {
-  photographe: ['photo', 'photographe', 'studio', 'image', 'visual', 'picture', 'pic', 'film', 'vidéo', 'video', 'clic', 'clac', 'objectif', 'lens'],
-  restaurateur: ['restaurant', 'brasserie', 'bistro', 'bistrot', 'café', 'cafe', 'cantine', 'traiteur', 'cuisine', 'gastronomie', 'pizzeria', 'burger', 'sushi', 'bouchon'],
-  fleuriste: ['fleur', 'floral', 'atelier', 'bouquet', 'jardin', 'vegetal', 'végétal', 'rose', 'bloom'],
-  coiffeur: ['coiffure', 'coiffeur', 'salon', 'hair', 'barbier', 'barber', 'beauty', 'beauté', 'tif'],
-  boulangerie: ['boulange', 'boulangerie', 'pain', 'patisserie', 'pâtisserie', 'four', 'levain', 'viennoiserie'],
-  antiquaire: ['antiquit', 'brocante', 'vintage', 'galerie', 'antique', 'occasion', 'collection'],
-  librairie: ['librair', 'livre', 'book', 'bouquin', 'lecture'],
-  architecte: ['architecte', 'architecture', 'cabinet', 'bureau', 'design', 'urbanisme'],
-};
-
-function isRelevant(name: string, address: string, secteur: string, ville: string): boolean {
-  const nameLow = name.toLowerCase();
-  const addrLow = address.toLowerCase();
-
-  // Filtre géographique souple : au moins un mot de la ville dans l'adresse ou le nom
-  const villeWords = ville.toLowerCase().split(/[\s,]+/).filter(w => w.length > 3 && !/^\d+$/.test(w));
-  // Si adresse vide ou ville non détectable → on garde quand même (mieux d'en avoir trop que pas assez)
-  const cityMatch = villeWords.length === 0 || villeWords.some(kw => addrLow.includes(kw) || nameLow.includes(kw));
-
-  // Filtre sectoriel souple : on exclut uniquement les faux positifs évidents (alimentaire ≠ photo, etc.)
-  const HARD_EXCLUDE: Record<string, string[]> = {
-    photographe: ['boulangerie', 'patisserie', 'restaurant', 'coiffeur', 'pharmacie', 'maraich'],
-    restaurateur: ['photographe', 'coiffeur', 'fleuriste', 'pharmacie'],
-    fleuriste: ['photographe', 'restaurant', 'coiffeur', 'pharmacie'],
-    coiffeur: ['photographe', 'restaurant', 'fleuriste', 'pharmacie', 'boulangerie'],
-    boulangerie: ['photographe', 'coiffeur', 'fleuriste'],
-  };
-  const sectorKey = Object.keys(HARD_EXCLUDE).find(k => secteur.toLowerCase().includes(k));
-  const excluded = sectorKey ? HARD_EXCLUDE[sectorKey] : [];
-  const notExcluded = excluded.length === 0 || !excluded.some(kw => nameLow.includes(kw));
-
-  return cityMatch && notExcluded;
-}
-
 const EMAIL_BLACKLIST = ['sentry', 'wixpress', 'example', 'domain', '@2x', 'noreply', 'no-reply', 'placeholder', 'schema', 'pixel', 'amazonaws', '.png', '.jpg', '.gif', 'support@wix'];
-
-function extractEmailFromHtml(html: string): string | null {
-  // 1. mailto: links (most reliable)
-  const mailtoMatches = [...html.matchAll(/mailto:([^"'?>\s,;]+)/g)];
-  for (const m of mailtoMatches) {
-    const email = m[1].split('?')[0].toLowerCase().trim();
-    if (isValidEmail(email)) return email;
-  }
-
-  // 2. data-email / data-cfemail attributes (Cloudflare obfuscation → skip, too complex)
-  // 3. Regex on visible text
-  const emailRe = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
-  const matches = html.match(emailRe) || [];
-  for (const email of matches) {
-    if (isValidEmail(email.toLowerCase())) return email.toLowerCase();
-  }
-  return null;
-}
 
 function isValidEmail(email: string): boolean {
   if (email.length > 80 || email.length < 6) return false;
@@ -80,11 +26,27 @@ function isValidEmail(email: string): boolean {
   return true;
 }
 
+function extractEmailFromHtml(html: string): string | null {
+  const mailtoMatches = [...html.matchAll(/mailto:([^"'?>\s,;]+)/g)];
+  for (const m of mailtoMatches) {
+    const email = m[1].split('?')[0].toLowerCase().trim();
+    if (isValidEmail(email)) return email;
+  }
+  const emailRe = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
+  const matches = html.match(emailRe) || [];
+  for (const email of matches) {
+    if (isValidEmail(email.toLowerCase())) return email.toLowerCase();
+  }
+  return null;
+}
+
 async function scrapeEmail(websiteUrl: string): Promise<string | null> {
   const urlsToTry = [websiteUrl];
   try {
     const base = new URL(websiteUrl).origin;
-    if (!websiteUrl.includes('/contact')) urlsToTry.push(base + '/contact', base + '/contact-us', base + '/nous-contacter', base + '/a-propos');
+    if (!websiteUrl.includes('/contact')) {
+      urlsToTry.push(base + '/contact', base + '/nous-contacter', base + '/a-propos');
+    }
   } catch { /* invalid url */ }
 
   for (const url of urlsToTry) {
@@ -100,9 +62,26 @@ async function scrapeEmail(websiteUrl: string): Promise<string | null> {
       const html = await res.text();
       const email = extractEmailFromHtml(html);
       if (email) return email;
-    } catch { /* timeout or fetch error */ }
+    } catch { /* timeout */ }
   }
   return null;
+}
+
+async function fetchFromOutscraper(query: string, limit: number, apiKey: string): Promise<Record<string, unknown>[]> {
+  const params = new URLSearchParams({
+    query,
+    limit: String(limit),
+    language: 'fr',
+    region: 'FR',
+    fields: 'name,full_address,phone,site,emails_from_website,social_networks',
+    async: 'false',
+  });
+  const res = await fetch(`https://api.app.outscraper.com/maps/search-v3?${params}`, {
+    headers: { 'X-API-KEY': apiKey },
+  });
+  if (!res.ok) throw new Error(`Outscraper: ${await res.text()}`);
+  const data = await res.json();
+  return (data.data || []).flat();
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -112,56 +91,45 @@ export const POST: APIRoute = async ({ request }) => {
   if (!API_KEY) return json({ error: 'OUTSCRAPER_API_KEY non configuré' }, 500);
 
   const body = await request.json();
-  const { secteur, ville, max = 10 } = body;
+  const { secteur, ville, max = 20 } = body;
   if (!secteur || !ville) return json({ error: 'secteur et ville requis' }, 400);
 
-  // Demander plus de résultats pour compenser le filtre
-  const fetchLimit = Math.min(Math.max(max * 2, 20), 20);
-  const query = `${secteur} ${ville}`;
+  const secteurNorm = secteur.toLowerCase()
+    .replace(/s$/, '').replace(/ies$/, 'ie').replace(/eurs$/, 'eur');
 
-  const params = new URLSearchParams({
-    query,
-    limit: String(fetchLimit),
-    language: 'fr',
-    region: 'FR',
-    fields: 'name,full_address,phone,site,emails_from_website,social_networks,place_id',
-    async: 'false',
-  });
+  // Pour dépasser 20 résultats, on fait plusieurs requêtes avec des zones différentes
+  let places: Record<string, unknown>[] = [];
+  const seen = new Set<string>();
 
-  const res = await fetch(`https://api.app.outscraper.com/maps/search-v3?${params}`, {
-    headers: { 'X-API-KEY': API_KEY },
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    return json({ error: `Outscraper: ${err}` }, 500);
+  try {
+    if (max <= 20) {
+      places = await fetchFromOutscraper(`${secteur} ${ville}`, max, API_KEY);
+    } else {
+      // Plusieurs requêtes : ville entière + zones/arrondissements
+      const queries = [`${secteur} ${ville}`];
+      // Ajouter des variantes si besoin de plus de résultats
+      if (max > 20) queries.push(`${secteur} près de ${ville}`, `${secteur} ${ville} France`);
+      for (const q of queries) {
+        if (places.length >= max) break;
+        const batch = await fetchFromOutscraper(q, 20, API_KEY);
+        for (const p of batch) {
+          const key = (p.name as string) + (p.phone as string || '');
+          if (!seen.has(key)) { seen.add(key); places.push(p); }
+        }
+      }
+      places = places.slice(0, max);
+    }
+  } catch (e: unknown) {
+    return json({ error: e instanceof Error ? e.message : String(e) }, 500);
   }
 
-  const data = await res.json();
-  const places: Record<string, unknown>[] = (data.data || []).flat();
-
-  const secteurNorm = secteur.toLowerCase()
-    .replace(/s$/, '')
-    .replace(/ies$/, 'ie')
-    .replace(/eurs$/, 'eur');
-
-  // Filtrer et enrichir en parallèle
-  const filtered = places.filter(p => {
-    const name = (p.name as string) || '';
-    const address = (p.full_address as string) || '';
-    return name && isRelevant(name, address, secteur, ville);
-  }).slice(0, max);
-
+  // Enrichir avec emails en parallèle
   const results = await Promise.all(
-    filtered.map(async (p) => {
+    places.map(async (p) => {
       const outscrapeEmails: string[] = (p.emails_from_website as string[]) || [];
       const websiteUrl = (p.site as string) || null;
-
-      // Utiliser l'email Outscraper si dispo, sinon scraper nous-mêmes
       let email = outscrapeEmails.find(e => isValidEmail(e.toLowerCase())) || null;
-      if (!email && websiteUrl) {
-        email = await scrapeEmail(websiteUrl);
-      }
+      if (!email && websiteUrl) email = await scrapeEmail(websiteUrl);
 
       const socials = (p.social_networks as Record<string, string>) || {};
       const phone = (p.phone as string) || null;
@@ -185,7 +153,7 @@ export const POST: APIRoute = async ({ request }) => {
     })
   );
 
-  return json({ results: results.filter(r => r.nom), query });
+  return json({ results: results.filter(r => r.nom), query: `${secteur} ${ville}` });
 };
 
 function extractVille(address: string, fallback: string): string {
