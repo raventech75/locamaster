@@ -91,37 +91,48 @@ export const POST: APIRoute = async ({ request }) => {
   if (!API_KEY) return json({ error: 'OUTSCRAPER_API_KEY non configuré' }, 500);
 
   const body = await request.json();
-  const { secteur, ville, max = 20 } = body;
+  const { secteur, ville, codePostal, max = 20 } = body;
   if (!secteur || !ville) return json({ error: 'secteur et ville requis' }, 400);
 
   const secteurNorm = secteur.toLowerCase()
     .replace(/s$/, '').replace(/ies$/, 'ie').replace(/eurs$/, 'eur');
 
-  // Pour dépasser 20 résultats, on fait plusieurs requêtes avec des zones différentes
-  let places: Record<string, unknown>[] = [];
+  // Inclure le code postal dans la requête pour limiter le rayon géographique
+  const locationQuery = codePostal ? `${ville} ${codePostal}` : ville;
   const seen = new Set<string>();
+  let places: Record<string, unknown>[] = [];
 
   try {
-    if (max <= 20) {
-      places = await fetchFromOutscraper(`${secteur} ${ville}`, max, API_KEY);
-    } else {
-      // Plusieurs requêtes : ville entière + zones/arrondissements
-      const queries = [`${secteur} ${ville}`];
-      // Ajouter des variantes si besoin de plus de résultats
-      if (max > 20) queries.push(`${secteur} près de ${ville}`, `${secteur} ${ville} France`);
-      for (const q of queries) {
-        if (places.length >= max) break;
-        const batch = await fetchFromOutscraper(q, 20, API_KEY);
-        for (const p of batch) {
-          const key = (p.name as string) + (p.phone as string || '');
-          if (!seen.has(key)) { seen.add(key); places.push(p); }
-        }
+    // Première requête avec code postal si dispo
+    const batch1 = await fetchFromOutscraper(`${secteur} ${locationQuery}`, 20, API_KEY);
+    for (const p of batch1) {
+      const key = (p.name as string) + (p.phone as string || '');
+      if (!seen.has(key)) { seen.add(key); places.push(p); }
+    }
+
+    // Si on veut plus de résultats, requêtes supplémentaires
+    if (max > 20 && places.length < max) {
+      const batch2 = await fetchFromOutscraper(`${secteur} ${ville}`, 20, API_KEY);
+      for (const p of batch2) {
+        const key = (p.name as string) + (p.phone as string || '');
+        if (!seen.has(key)) { seen.add(key); places.push(p); }
       }
-      places = places.slice(0, max);
     }
   } catch (e: unknown) {
     return json({ error: e instanceof Error ? e.message : String(e) }, 500);
   }
+
+  // Filtre géographique sur l'adresse réelle retournée par Outscraper
+  const villeWords = ville.toLowerCase().split(/[\s\-]+/).filter((w: string) => w.length > 2);
+  const cpFilter = codePostal ? codePostal.toString() : null;
+
+  places = places.filter(p => {
+    const addr = ((p.full_address as string) || '').toLowerCase();
+    if (!addr) return true; // pas d'adresse = on garde
+    const cpMatch = cpFilter ? addr.includes(cpFilter) : true;
+    const villeMatch = villeWords.some((w: string) => addr.includes(w));
+    return cpMatch || villeMatch;
+  }).slice(0, max);
 
   // Enrichir avec emails en parallèle
   const results = await Promise.all(
@@ -157,7 +168,14 @@ export const POST: APIRoute = async ({ request }) => {
 };
 
 function extractVille(address: string, fallback: string): string {
+  if (!address) return fallback;
   const parts = address.split(',').map(s => s.trim());
-  const cityPart = parts.find(p => /\d{5}/.test(p));
-  return cityPart || fallback;
+  // Format FR : "Rue X, 93230 Romainville, France" → "93230 Romainville"
+  for (const part of parts) {
+    const m = part.match(/^\d{5}\s+(.+)$/);
+    if (m) return m[1]; // retourne "Romainville", "Paris", etc.
+  }
+  // Fallback : avant-dernier élément (avant "France")
+  const filtered = parts.filter(p => p && p.toLowerCase() !== 'france');
+  return filtered[filtered.length - 1] || fallback;
 }
