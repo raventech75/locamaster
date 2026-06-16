@@ -83,71 +83,78 @@ export const POST: APIRoute = async ({ request }) => {
 
     // --------------------------------------------------------
     // 1. SUPABASE — Stockage du lead
-    // Décommenter quand Supabase est configuré
-    // --------------------------------------------------------
-    /*
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabase = createClient(
-      import.meta.env.PUBLIC_SUPABASE_URL,
-      import.meta.env.SUPABASE_SERVICE_ROLE_KEY
-    );
-    const { error: supabaseError } = await supabase
-      .from('leads')
-      .insert([lead]);
-    if (supabaseError) {
-      console.error('Supabase insert error:', supabaseError);
-      // Ne pas bloquer si Supabase échoue — notifier quand même via Make
+    // Lecture des variables d'env : .env en dev (import.meta.env),
+    // variables Vercel au runtime (process.env).
+    const env = (k: string): string | undefined =>
+      (import.meta.env as Record<string, string | undefined>)[k] ?? process.env[k];
+
+    const SUPABASE_URL = env('PUBLIC_SUPABASE_URL');
+    const SUPABASE_SERVICE_ROLE_KEY = env('SUPABASE_SERVICE_ROLE_KEY');
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+          auth: { persistSession: false },
+        });
+        const { error } = await supabase.from('leads').insert([lead]);
+        if (error) console.error('[contact] Supabase insert error:', error.message);
+      } catch (e) {
+        console.error('[contact] Supabase exception:', e);
+        // Ne bloque pas : on tente quand même Make / email
+      }
     }
-    */
 
     // --------------------------------------------------------
     // 2. MAKE — Webhook pour automatisation
-    // Décommenter quand MAKE_WEBHOOK_URL est configuré
     // --------------------------------------------------------
-    /*
-    const makeWebhookUrl = import.meta.env.MAKE_WEBHOOK_URL;
-    if (makeWebhookUrl) {
-      await fetch(makeWebhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(lead),
-      }).catch((err) => console.error('Make webhook error:', err));
+    const MAKE_WEBHOOK_URL = env('MAKE_WEBHOOK_URL');
+    if (MAKE_WEBHOOK_URL) {
+      try {
+        await fetch(MAKE_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(lead),
+        });
+      } catch (e) {
+        console.error('[contact] Make webhook error:', e);
+      }
     }
-    */
 
     // --------------------------------------------------------
-    // 3. EMAIL via Resend (notification)
-    // Décommenter quand RESEND_API_KEY est configuré
+    // 3. EMAIL via Resend (notification, optionnel)
     // --------------------------------------------------------
-    /*
-    const resendApiKey = import.meta.env.RESEND_API_KEY;
-    const notifEmail = import.meta.env.NOTIFICATION_EMAIL || 'contact@locamaster.fr';
-    if (resendApiKey) {
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'Locamaster Site <noreply@locamaster.fr>',
-          to: [notifEmail],
-          subject: `Nouveau lead : ${lead.nom} — ${lead.besoin}`,
-          html: `
-            <h2>Nouveau lead Locamaster</h2>
-            <p><strong>Nom :</strong> ${lead.nom}</p>
-            <p><strong>Entreprise :</strong> ${lead.entreprise || '—'}</p>
-            <p><strong>Email :</strong> ${lead.email}</p>
-            <p><strong>Téléphone :</strong> ${lead.telephone || '—'}</p>
-            <p><strong>Besoin :</strong> ${lead.besoin}</p>
-            <p><strong>Budget :</strong> ${lead.budget || '—'}</p>
-            <p><strong>Message :</strong></p>
-            <p>${lead.message.replace(/\n/g, '<br>')}</p>
-          `,
-        }),
-      }).catch((err) => console.error('Resend error:', err));
+    const RESEND_API_KEY = env('RESEND_API_KEY');
+    const NOTIFICATION_EMAIL = env('NOTIFICATION_EMAIL') || 'contact@locamaster.fr';
+    if (RESEND_API_KEY) {
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Locamaster Site <noreply@locamaster.fr>',
+            to: [NOTIFICATION_EMAIL],
+            reply_to: lead.email,
+            subject: `Nouveau lead : ${lead.nom} — ${lead.besoin}`,
+            html: `
+              <h2>Nouveau lead Locamaster</h2>
+              <p><strong>Nom :</strong> ${lead.nom}</p>
+              <p><strong>Entreprise :</strong> ${lead.entreprise || '—'}</p>
+              <p><strong>Email :</strong> ${lead.email}</p>
+              <p><strong>Téléphone :</strong> ${lead.telephone || '—'}</p>
+              <p><strong>Besoin :</strong> ${lead.besoin}</p>
+              <p><strong>Budget :</strong> ${lead.budget || '—'}</p>
+              <p><strong>Message :</strong></p>
+              <p>${lead.message.replace(/\n/g, '<br>')}</p>
+            `,
+          }),
+        });
+      } catch (e) {
+        console.error('[contact] Resend error:', e);
+      }
     }
-    */
 
     // Log en développement
     if (import.meta.env.DEV) {
