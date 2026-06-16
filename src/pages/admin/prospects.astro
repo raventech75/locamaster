@@ -1,0 +1,468 @@
+---
+export const prerender = false;
+
+// Protection simple par token en query param
+const token = Astro.url.searchParams.get('token');
+const adminToken = process.env.ADMIN_TOKEN ?? import.meta.env.ADMIN_TOKEN;
+
+if (!adminToken || token !== adminToken) {
+  return Astro.redirect('/404');
+}
+---
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prospects — Locamaster Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #f5f5f4; color: #1c1917; font-size: 14px; min-height: 100vh; }
+
+    /* Layout */
+    .topbar { background: #1c1917; color: #fff; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .topbar-brand { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+    .topbar-brand span { background: #f59e0b; color: #1c1917; width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+    .topbar-right { font-size: 12px; color: #a8a29e; }
+    .main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .stat { background: #fff; border: 1px solid #e7e5e4; border-radius: 10px; padding: 14px 16px; }
+    .stat-value { font-size: 24px; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 11px; color: #78716c; margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+    .stat.s-nouveau .stat-value { color: #6366f1; }
+    .stat.s-contacte .stat-value { color: #f59e0b; }
+    .stat.s-interesse .stat-value { color: #10b981; }
+    .stat.s-signe .stat-value { color: #059669; }
+
+    /* Toolbar */
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+    .toolbar select, .toolbar input { border: 1px solid #d6d3d1; border-radius: 8px; padding: 8px 12px; font-size: 13px; background: #fff; outline: none; }
+    .toolbar select:focus, .toolbar input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.15); }
+    .toolbar input { flex: 1; min-width: 180px; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: opacity .15s; }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: #f59e0b; color: #1c1917; }
+    .btn-ghost { background: #fff; color: #1c1917; border: 1px solid #d6d3d1; }
+    .btn-danger { background: #fee2e2; color: #dc2626; border: none; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+    .btn-email { background: #dbeafe; color: #1d4ed8; }
+    .btn-email.sent { background: #d1fae5; color: #065f46; cursor: default; opacity: .7; }
+
+    /* Table */
+    .table-wrap { background: #fff; border: 1px solid #e7e5e4; border-radius: 12px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #78716c; background: #fafaf9; border-bottom: 1px solid #e7e5e4; }
+    td { padding: 11px 14px; border-bottom: 1px solid #f5f5f4; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafaf9; }
+    .empty { text-align: center; padding: 48px; color: #a8a29e; }
+
+    /* Badges statut */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+    .badge-nouveau { background: #ede9fe; color: #5b21b6; } .badge-nouveau::before { background: #6366f1; }
+    .badge-contacte { background: #fef3c7; color: #92400e; } .badge-contacte::before { background: #f59e0b; }
+    .badge-interesse { background: #d1fae5; color: #065f46; } .badge-interesse::before { background: #10b981; }
+    .badge-en_cours { background: #dbeafe; color: #1e40af; } .badge-en_cours::before { background: #3b82f6; }
+    .badge-signe { background: #bbf7d0; color: #14532d; } .badge-signe::before { background: #059669; }
+    .badge-perdu { background: #fee2e2; color: #991b1b; } .badge-perdu::before { background: #dc2626; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 14px; padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-size: 17px; font-weight: 700; margin-bottom: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-col2 { grid-column: span 2; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #57534e; margin-bottom: 4px; }
+    input[type=text], input[type=email], input[type=tel], select, textarea { width: 100%; border: 1px solid #d6d3d1; border-radius: 8px; padding: 9px 11px; font-size: 13px; outline: none; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.15); }
+    textarea { resize: vertical; min-height: 72px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+    /* Notes inline */
+    .notes-cell { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #78716c; font-size: 12px; }
+    .actions { display: flex; gap: 6px; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #1c1917; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; z-index: 300; transform: translateY(20px); opacity: 0; transition: all .25s; pointer-events: none; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: #065f46; }
+    .toast.error { background: #991b1b; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <span>L</span>
+    Locamaster · Prospects
+  </div>
+  <div class="topbar-right" id="last-update"></div>
+</div>
+
+<main class="main">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat s-total"><div class="stat-value" id="s-total">—</div><div class="stat-label">Total</div></div>
+    <div class="stat s-nouveau"><div class="stat-value" id="s-nouveau">—</div><div class="stat-label">Nouveaux</div></div>
+    <div class="stat s-contacte"><div class="stat-value" id="s-contacte">—</div><div class="stat-label">Contactés</div></div>
+    <div class="stat s-interesse"><div class="stat-value" id="s-interesse">—</div><div class="stat-label">Intéressés</div></div>
+    <div class="stat s-signe"><div class="stat-value" id="s-signe">—</div><div class="stat-label">Signés</div></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="🔍 Rechercher nom, entreprise, ville…" oninput="filterTable()" />
+    <select id="filter-statut" onchange="filterTable()">
+      <option value="tous">Tous les statuts</option>
+      <option value="nouveau">Nouveau</option>
+      <option value="contacte">Contacté</option>
+      <option value="interesse">Intéressé</option>
+      <option value="en_cours">En cours</option>
+      <option value="signe">Signé</option>
+      <option value="perdu">Perdu</option>
+    </select>
+    <select id="filter-secteur" onchange="filterTable()">
+      <option value="tous">Tous les secteurs</option>
+      <option value="restaurateur">Restaurateur</option>
+      <option value="fleuriste">Fleuriste</option>
+      <option value="coiffeur">Coiffeur</option>
+      <option value="antiquaire">Antiquaire</option>
+      <option value="libraire">Libraire</option>
+      <option value="boulanger">Boulanger</option>
+      <option value="architecte">Architecte</option>
+      <option value="coach">Coach / Thérapeute</option>
+      <option value="autre">Autre</option>
+    </select>
+    <button class="btn btn-primary" onclick="openModal()">+ Ajouter un prospect</button>
+    <button class="btn btn-ghost" onclick="loadProspects()">↻ Actualiser</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nom / Entreprise</th>
+          <th>Secteur</th>
+          <th>Contact</th>
+          <th>Ville</th>
+          <th>Statut</th>
+          <th>Notes</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="7" class="empty">Chargement…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- Modal ajout / édition -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2 id="modal-title">Ajouter un prospect</h2>
+    <input type="hidden" id="f-id" />
+    <div class="form-grid">
+      <div>
+        <label for="f-nom">Nom *</label>
+        <input type="text" id="f-nom" placeholder="Jean Dupont" />
+      </div>
+      <div>
+        <label for="f-entreprise">Entreprise</label>
+        <input type="text" id="f-entreprise" placeholder="Le Bistrot du Marché" />
+      </div>
+      <div>
+        <label for="f-secteur">Secteur</label>
+        <select id="f-secteur">
+          <option value="">— Choisir —</option>
+          <option value="restaurateur">Restaurateur</option>
+          <option value="fleuriste">Fleuriste</option>
+          <option value="coiffeur">Coiffeur</option>
+          <option value="antiquaire">Antiquaire</option>
+          <option value="libraire">Libraire</option>
+          <option value="boulanger">Boulanger</option>
+          <option value="architecte">Architecte</option>
+          <option value="coach">Coach / Thérapeute</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div>
+        <label for="f-ville">Ville</label>
+        <input type="text" id="f-ville" placeholder="Paris 11e" />
+      </div>
+      <div>
+        <label for="f-email">Email</label>
+        <input type="email" id="f-email" placeholder="contact@bistrot.fr" />
+      </div>
+      <div>
+        <label for="f-telephone">Téléphone</label>
+        <input type="tel" id="f-telephone" placeholder="06 12 34 56 78" />
+      </div>
+      <div>
+        <label for="f-statut">Statut</label>
+        <select id="f-statut">
+          <option value="nouveau">Nouveau</option>
+          <option value="contacte">Contacté</option>
+          <option value="interesse">Intéressé</option>
+          <option value="en_cours">En cours</option>
+          <option value="signe">Signé</option>
+          <option value="perdu">Perdu</option>
+        </select>
+      </div>
+      <div>
+        <label for="f-source">Source</label>
+        <select id="f-source">
+          <option value="manuel">Manuel</option>
+          <option value="google-maps">Google Maps</option>
+          <option value="instagram">Instagram</option>
+          <option value="linkedin">LinkedIn</option>
+          <option value="referral">Bouche à oreille</option>
+          <option value="phantom">Phantombuster</option>
+        </select>
+      </div>
+      <div class="form-col2">
+        <label for="f-notes">Notes</label>
+        <textarea id="f-notes" placeholder="Infos utiles, objections, contexte…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveProspect()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script define:vars={{ token: token }}>
+let prospects = [];
+
+const STATUT_LABELS = {
+  nouveau: 'Nouveau', contacte: 'Contacté', interesse: 'Intéressé',
+  en_cours: 'En cours', signe: 'Signé', perdu: 'Perdu',
+};
+
+const SECTEUR_LABELS = {
+  restaurateur: '🍽 Restaurateur', fleuriste: '🌸 Fleuriste', coiffeur: '✂️ Coiffeur',
+  antiquaire: '🏺 Antiquaire', libraire: '📚 Libraire', boulanger: '🥖 Boulanger',
+  architecte: '📐 Architecte', coach: '🧘 Coach', autre: '👤 Autre',
+};
+
+function apiUrl(path) {
+  return `${path}?token=${token}`;
+}
+
+async function loadProspects() {
+  try {
+    const res = await fetch(apiUrl('/api/prospects'));
+    prospects = await res.json();
+    renderTable(prospects);
+    updateStats(prospects);
+    document.getElementById('last-update').textContent = 'Mis à jour à ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  } catch (e) {
+    showToast('Erreur de chargement', 'error');
+  }
+}
+
+function updateStats(data) {
+  document.getElementById('s-total').textContent = data.length;
+  ['nouveau','contacte','interesse','signe'].forEach(s => {
+    const el = document.getElementById('s-' + s);
+    if (el) el.textContent = data.filter(p => p.statut === s).length;
+  });
+}
+
+function filterTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const statut = document.getElementById('filter-statut').value;
+  const secteur = document.getElementById('filter-secteur').value;
+  const filtered = prospects.filter(p => {
+    const matchQ = !q || [p.nom, p.entreprise, p.ville].some(v => v?.toLowerCase().includes(q));
+    const matchS = statut === 'tous' || p.statut === statut;
+    const matchSec = secteur === 'tous' || p.secteur === secteur;
+    return matchQ && matchS && matchSec;
+  });
+  renderTable(filtered);
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('tbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Aucun prospect trouvé</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td>
+        <div style="font-weight:600;font-size:13px">${esc(p.nom)}</div>
+        ${p.entreprise ? `<div style="color:#78716c;font-size:12px">${esc(p.entreprise)}</div>` : ''}
+      </td>
+      <td>${p.secteur ? (SECTEUR_LABELS[p.secteur] || p.secteur) : '<span style="color:#a8a29e">—</span>'}</td>
+      <td>
+        ${p.email ? `<a href="mailto:${esc(p.email)}" style="color:#1d4ed8;text-decoration:none;font-size:12px">${esc(p.email)}</a><br>` : ''}
+        ${p.telephone ? `<span style="font-size:12px;color:#57534e">${esc(p.telephone)}</span>` : ''}
+        ${!p.email && !p.telephone ? '<span style="color:#a8a29e">—</span>' : ''}
+      </td>
+      <td style="font-size:12px;color:#57534e">${p.ville || '—'}</td>
+      <td>
+        <select class="badge badge-${p.statut}" onchange="updateStatut('${p.id}', this.value)" style="border:none;background:transparent;cursor:pointer;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;outline:none">
+          ${Object.entries(STATUT_LABELS).map(([v,l]) => `<option value="${v}" ${p.statut===v?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </td>
+      <td class="notes-cell" title="${esc(p.notes || '')}">${p.notes ? esc(p.notes) : '<span style="color:#a8a29e">—</span>'}</td>
+      <td>
+        <div class="actions">
+          ${p.email ? `<button class="btn btn-sm btn-email ${p.email_envoye?'sent':''}" onclick="${p.email_envoye?'':(`sendEmail('${p.id}','${esc(p.nom)}','${esc(p.entreprise||'')}','${esc(p.email)}','${p.secteur||''}')`)}" title="${p.email_envoye?'Email déjà envoyé':'Envoyer email de prospection'}">
+            ${p.email_envoye ? '✓ Envoyé' : '✉ Email'}
+          </button>` : ''}
+          <button class="btn btn-sm btn-ghost" onclick="openEdit('${p.id}')">Éditer</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteProspect('${p.id}')">✕</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+async function updateStatut(id, statut) {
+  try {
+    await fetch(apiUrl('/api/prospects'), {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, statut }),
+    });
+    const p = prospects.find(x => x.id === id);
+    if (p) p.statut = statut;
+    updateStats(prospects);
+    showToast('Statut mis à jour', 'success');
+  } catch (e) { showToast('Erreur', 'error'); }
+}
+
+async function sendEmail(id, nom, entreprise, email, secteur) {
+  if (!confirm(`Envoyer l'email de prospection à ${nom} (${email}) ?`)) return;
+  try {
+    const res = await fetch(apiUrl('/api/send-prospect-email'), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prospectId: id, nom, entreprise, email, secteur }),
+    });
+    if (!res.ok) throw new Error((await res.json()).error);
+    const p = prospects.find(x => x.id === id);
+    if (p) { p.email_envoye = true; p.statut = 'contacte'; }
+    renderTable(prospects);
+    updateStats(prospects);
+    showToast(`Email envoyé à ${nom} !`, 'success');
+  } catch (e) { showToast('Erreur : ' + e.message, 'error'); }
+}
+
+async function deleteProspect(id) {
+  if (!confirm('Supprimer ce prospect ?')) return;
+  try {
+    await fetch(apiUrl('/api/prospects'), {
+      method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    prospects = prospects.filter(p => p.id !== id);
+    renderTable(prospects);
+    updateStats(prospects);
+    showToast('Prospect supprimé', 'success');
+  } catch (e) { showToast('Erreur', 'error'); }
+}
+
+function openModal() {
+  document.getElementById('modal-title').textContent = 'Ajouter un prospect';
+  ['id','nom','entreprise','email','telephone','ville','notes'].forEach(f => {
+    document.getElementById('f-' + f).value = '';
+  });
+  document.getElementById('f-statut').value = 'nouveau';
+  document.getElementById('f-secteur').value = '';
+  document.getElementById('f-source').value = 'manuel';
+  document.getElementById('modal').classList.add('open');
+}
+
+function openEdit(id) {
+  const p = prospects.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modal-title').textContent = 'Modifier le prospect';
+  document.getElementById('f-id').value = p.id;
+  document.getElementById('f-nom').value = p.nom || '';
+  document.getElementById('f-entreprise').value = p.entreprise || '';
+  document.getElementById('f-email').value = p.email || '';
+  document.getElementById('f-telephone').value = p.telephone || '';
+  document.getElementById('f-ville').value = p.ville || '';
+  document.getElementById('f-secteur').value = p.secteur || '';
+  document.getElementById('f-statut').value = p.statut || 'nouveau';
+  document.getElementById('f-source').value = p.source || 'manuel';
+  document.getElementById('f-notes').value = p.notes || '';
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+async function saveProspect() {
+  const id = document.getElementById('f-id').value;
+  const data = {
+    nom: document.getElementById('f-nom').value.trim(),
+    entreprise: document.getElementById('f-entreprise').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    telephone: document.getElementById('f-telephone').value.trim(),
+    ville: document.getElementById('f-ville').value.trim(),
+    secteur: document.getElementById('f-secteur').value,
+    statut: document.getElementById('f-statut').value,
+    source: document.getElementById('f-source').value,
+    notes: document.getElementById('f-notes').value.trim(),
+  };
+  if (!data.nom) { showToast('Le nom est requis', 'error'); return; }
+  try {
+    if (id) {
+      const res = await fetch(apiUrl('/api/prospects'), {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...data }),
+      });
+      const updated = await res.json();
+      const idx = prospects.findIndex(p => p.id === id);
+      if (idx !== -1) prospects[idx] = updated;
+    } else {
+      const res = await fetch(apiUrl('/api/prospects'), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const created = await res.json();
+      prospects.unshift(created);
+    }
+    closeModal();
+    renderTable(prospects);
+    updateStats(prospects);
+    showToast(id ? 'Prospect mis à jour' : 'Prospect ajouté', 'success');
+  } catch (e) { showToast('Erreur lors de la sauvegarde', 'error'); }
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 3000);
+}
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+loadProspects();
+</script>
+
+</body>
+</html>
