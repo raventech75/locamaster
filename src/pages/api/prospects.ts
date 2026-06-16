@@ -3,10 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 export const prerender = false;
 
-const getEnv = (k: string): string | undefined => {
-  try { return process.env[k] ?? (import.meta.env as Record<string, string | undefined>)[k]; }
-  catch { return process.env[k]; }
-};
+const getEnv = (k: string): string | undefined => process.env[k];
 
 function getSupabase() {
   const url = getEnv('PUBLIC_SUPABASE_URL');

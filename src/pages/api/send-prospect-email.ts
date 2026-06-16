@@ -2,10 +2,7 @@ import type { APIRoute } from 'astro';
 
 export const prerender = false;
 
-const getEnv = (k: string): string | undefined => {
-  try { return process.env[k] ?? (import.meta.env as Record<string, string | undefined>)[k]; }
-  catch { return process.env[k]; }
-};
+const getEnv = (k: string): string | undefined => process.env[k];
 
 function checkToken(request: Request): boolean {
   const url = new URL(request.url);
