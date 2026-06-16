@@ -243,8 +243,10 @@ if (!adminToken || token !== adminToken) {
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="admin-cfg" data-token={token} style="display:none"></div>
 
-<script define:vars={{ token: token }}>
+<script is:inline>
+const token = document.getElementById('admin-cfg').dataset.token;
 let prospects = [];
 
 const STATUT_LABELS = {
