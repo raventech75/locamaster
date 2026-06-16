@@ -1,0 +1,91 @@
+---
+// Animation hero — "écran de studio" : viseur (rule of thirds + coins de
+// mise au point), ouverture d'objectif qui tourne/respire, ligne de scan
+// vidéo, voyant REC. SVG + CSS uniquement (zéro dépendance, léger).
+// Évoque la photo/vidéo. Figé proprement en prefers-reduced-motion.
+---
+
+<div class="hero-anim absolute inset-0 bg-ink overflow-hidden" aria-hidden="true">
+  <svg class="w-full h-full" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" fill="none">
+    <!-- Grille rule-of-thirds -->
+    <g stroke="#FBF9F4" stroke-opacity="0.08" stroke-width="1">
+      <line x1="133.3" y1="0" x2="133.3" y2="500" />
+      <line x1="266.6" y1="0" x2="266.6" y2="500" />
+      <line x1="0" y1="166.6" x2="400" y2="166.6" />
+      <line x1="0" y1="333.3" x2="400" y2="333.3" />
+    </g>
+
+    <!-- Coins de mise au point -->
+    <g class="focus-corners" stroke="#F2B01E" stroke-width="3" stroke-linecap="round">
+      <path d="M30 64 V30 H64" />
+      <path d="M370 64 V30 H336" />
+      <path d="M30 436 V470 H64" />
+      <path d="M370 436 V470 H336" />
+    </g>
+
+    <!-- Ouverture d'objectif (aperture) -->
+    <g class="aperture-breathe" style="transform-box:fill-box;transform-origin:center">
+      <circle cx="200" cy="250" r="78" stroke="#F2B01E" stroke-opacity="0.5" stroke-width="1.5" />
+      <g class="aperture-spin" style="transform-box:fill-box;transform-origin:center" stroke="#F2B01E" stroke-width="2" stroke-linejoin="round">
+        <!-- hexagone -->
+        <polygon points="200,188 254,219 254,281 200,312 146,281 146,219" stroke-opacity="0.9" />
+        <!-- lames -->
+        <g stroke-opacity="0.55">
+          <line x1="200" y1="188" x2="200" y2="250" />
+          <line x1="254" y1="219" x2="200" y2="250" />
+          <line x1="254" y1="281" x2="200" y2="250" />
+          <line x1="200" y1="312" x2="200" y2="250" />
+          <line x1="146" y1="281" x2="200" y2="250" />
+          <line x1="146" y1="219" x2="200" y2="250" />
+        </g>
+      </g>
+      <circle cx="200" cy="250" r="5" fill="#F2B01E" />
+    </g>
+
+    <!-- Ligne de scan vidéo -->
+    <rect class="scan-line" x="0" y="0" width="400" height="2" fill="#F2B01E" fill-opacity="0.35" />
+
+    <!-- Voyant REC -->
+    <g>
+      <circle class="rec-dot" cx="40" cy="40" r="6" fill="#F2B01E" />
+      <text x="56" y="45" fill="#FBF9F4" fill-opacity="0.85" font-family="Inter, sans-serif" font-size="15" font-weight="700" letter-spacing="2">REC</text>
+    </g>
+    <text x="360" y="45" text-anchor="end" fill="#FBF9F4" fill-opacity="0.5" font-family="Inter, sans-serif" font-size="13" font-weight="600" letter-spacing="1">4K · 25p</text>
+    <text x="200" y="345" text-anchor="middle" fill="#FBF9F4" fill-opacity="0.55" font-family="Inter, sans-serif" font-size="12" font-weight="600" letter-spacing="3">MISE AU POINT</text>
+  </svg>
+</div>
+
+<style>
+  .aperture-spin { animation: ap-spin 22s linear infinite; }
+  .aperture-breathe { animation: ap-breathe 6s ease-in-out infinite; }
+  .focus-corners { animation: corners 4s ease-in-out infinite; }
+  .scan-line { animation: scan 5s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+  .rec-dot { animation: rec 1.6s ease-in-out infinite; }
+
+  @keyframes ap-spin { to { transform: rotate(360deg); } }
+  @keyframes ap-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+  @keyframes corners {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+  @keyframes scan {
+    0% { transform: translateY(20px); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(480px); opacity: 0; }
+  }
+  @keyframes rec {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aperture-spin, .aperture-breathe, .focus-corners, .scan-line, .rec-dot {
+      animation: none;
+    }
+    .scan-line { opacity: 0; }
+  }
+</style>

@@ -2,6 +2,7 @@
 // Hero — statement éditorial bold, fond clair, accent miel
 // Image de contexte artisan à droite, typographie oversized à gauche
 import FloatingShapes from '../components/FloatingShapes.astro';
+import HeroAnimation from '../components/HeroAnimation.astro';
 ---
 
 <section
@@ -75,14 +76,8 @@ import FloatingShapes from '../components/FloatingShapes.astro';
       <!-- Colonne image -->
       <div data-hero-el class="lg:col-span-5 relative">
         <div class="relative rounded-t-3xl overflow-hidden border-2 border-ink border-b-0 aspect-[4/5] lg:aspect-auto lg:h-[560px]">
-          <img
-            src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80&auto=format"
-            alt="Artisan menuisier au travail dans son atelier"
-            class="w-full h-full object-cover scale-110"
-            data-parallax="10"
-            fetchpriority="high"
-            loading="eager"
-          />
+          <!-- Motion design : écran de studio animé (photo/vidéo) -->
+          <HeroAnimation />
           <!-- Badge flottant -->
           <div class="absolute top-5 right-5 bg-bg border-2 border-ink rounded-full px-4 py-2 flex items-center gap-2 shadow-brutal">
             <svg class="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
