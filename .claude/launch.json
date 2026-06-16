@@ -6,6 +6,13 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--", "--port", "4321"],
       "port": 4321
+    },
+    {
+      "name": "locamaster-static",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", ".vercel/output/static"],
+      "port": 3000,
+      "autoPort": true
     }
   ]
 }

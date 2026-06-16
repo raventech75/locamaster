@@ -4,14 +4,18 @@
 // fourni en React : ici ce sont de VRAIS secteurs cibles, pas de faux logos
 // de grands comptes. Réécrit en vanilla (aucune dépendance React).
 const sectors: { name: string; icon: string }[] = [
-  { name: 'Plomberie', icon: 'M14 7l-1.5-1.5a3 3 0 00-4 4L4 13.5V18h4.5l4-4a3 3 0 004-4L14 7z' },
-  { name: 'Électricité', icon: 'M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5z' },
-  { name: 'Menuiserie', icon: 'M3 7l4-4 3 3-4 4-3-3zm4 0l10 10 3-3L10 4 7 7z' },
-  { name: 'Cuisiniste', icon: 'M4 4h16v6a4 4 0 01-4 4H8a4 4 0 01-4-4V4zm4 14h8v2H8z' },
-  { name: 'Rénovation', icon: 'M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6' },
-  { name: 'Maçonnerie', icon: 'M3 6h6v4H3V6zm8 0h10v4H11V6zM3 14h10v4H3v-4zm12 0h6v4h-6v-4z' },
-  { name: 'Couverture', icon: 'M3 12l9-7 9 7M5 11v8h14v-8' },
-  { name: 'Indépendants', icon: 'M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0' },
+  { name: 'Restaurateurs', icon: 'M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zm4-7v3m4-3v3m4-3v3' },
+  { name: 'Fleuristes', icon: 'M12 22V12m0 0C12 7 8 4 4 6c0 4 3.5 7 8 6zm0 0c0-5 4-8 8-6-0 4-3.5 7-8 6z' },
+  { name: 'Antiquaires', icon: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9zm6 11V10h6v10' },
+  { name: 'Libraires', icon: 'M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 014 17V5a2 2 0 012-2h14v14H6.5' },
+  { name: 'Boulangers', icon: 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18' },
+  { name: 'Coiffeurs', icon: 'M6 3a3 3 0 015.83 1M6 3l4 5M6 3H3m7.83 1A3 3 0 0118 3m0 0l-4 5m4-5h3m-7 5a3 3 0 01-3 3m3-3a3 3 0 013 3m-6 0v10m0-10H8m4 10h4m-4 0H8' },
+  { name: 'Architectes', icon: 'M3 21h18M9 21V9l3-3 3 3v12M9 21H3V5l6-2m6 18h6V5l-6-2' },
+  { name: 'Thérapeutes', icon: 'M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0' },
+  { name: 'Artisans', icon: 'M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3-3a1 1 0 000-1.4l-1.6-1.6a1 1 0 00-1.4 0l-3 3zm-9 9a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3-3a1 1 0 000-1.4l-1.6-1.6a1 1 0 00-1.4 0l-3 3z' },
+  { name: 'Photographes', icon: 'M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2zM12 17a4 4 0 100-8 4 4 0 000 8z' },
+  { name: 'Coaches', icon: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m8-10a4 4 0 100-8 4 4 0 000 8zm10 10v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75' },
+  { name: 'Indépendants', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
 ];
 ---
 
@@ -26,7 +30,7 @@ const sectors: { name: string; icon: string }[] = [
         Les métiers que j'accompagne.
       </h2>
       <p class="text-lead">
-        Artisans et entreprises locales d'Île-de-France. Survolez votre métier.
+        Commerces, artisans et professionnels locaux d'Île-de-France. Survolez votre métier.
       </p>
     </div>
 

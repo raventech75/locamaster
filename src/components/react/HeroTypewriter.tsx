@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 
 const TEXTS = [
-  'Plombiers', 'Menuisiers', 'Électriciens',
-  'Cuisinistes', 'Artisans du bâtiment', 'PME locales',
+  'Restaurateurs', 'Fleuristes', 'Antiquaires',
+  'Libraires', 'Boulangers', 'Coiffeurs',
+  'Architectes', 'Thérapeutes', 'Artisans',
 ];
 
 export default function HeroTypewriter() {

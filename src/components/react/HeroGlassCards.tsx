@@ -53,7 +53,7 @@ const CARDS = [
   {
     icon: '🎬',
     title: 'Tournage terminé',
-    sub: 'Martin Plomberie · Val-de-Marne',
+    sub: 'Le Clos des Saveurs · Restaurant',
     delay: 0.3,
     x: '-8%',
     y: '12%',
@@ -61,8 +61,8 @@ const CARDS = [
   },
   {
     icon: '📸',
-    title: '47 photos 4K livrées',
-    sub: 'Atelier Vidal Cuisines',
+    title: '54 photos livrées',
+    sub: 'Atelier Blanc · Fleuriste Paris 11',
     delay: 0.7,
     x: '5%',
     y: '52%',
@@ -70,8 +70,8 @@ const CARDS = [
   },
   {
     icon: '⭐',
-    title: '5/5 · Super travail !',
-    sub: 'Delta Électricité · Paris 11',
+    title: '5/5 · Résultat bluffant !',
+    sub: 'La Bouquinerie · Librairie',
     delay: 1.1,
     x: '-12%',
     y: '75%',

@@ -17,7 +17,7 @@ export const services: Service[] = [
     id: "photo",
     titre: "Shooting photo professionnel",
     description:
-      "Photos de chantier, d'atelier, de produits finis ou de votre équipe en situation. Retouchées, livrées rapidement, exploitables partout.",
+      "Photos de boutique, d'atelier, de produits, de plats ou de votre équipe en situation. Retouchées, livrées rapidement, exploitables partout.",
     icone: "camera",
   },
   {
