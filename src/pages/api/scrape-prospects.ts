@@ -31,20 +31,25 @@ const SECTEUR_KEYWORDS: Record<string, string[]> = {
 function isRelevant(name: string, address: string, secteur: string, ville: string): boolean {
   const nameLow = name.toLowerCase();
   const addrLow = address.toLowerCase();
-  const villeLow = ville.toLowerCase().split(' ')[0]; // "romainville" from "romainville 93230"
 
-  // Filtre géographique : l'adresse doit contenir la ville ou le code postal
-  const villeKeywords = villeLow.split(/\s+/).filter(w => w.length > 3);
-  const cityMatch = villeKeywords.some(kw => addrLow.includes(kw));
+  // Filtre géographique souple : au moins un mot de la ville dans l'adresse ou le nom
+  const villeWords = ville.toLowerCase().split(/[\s,]+/).filter(w => w.length > 3 && !/^\d+$/.test(w));
+  // Si adresse vide ou ville non détectable → on garde quand même (mieux d'en avoir trop que pas assez)
+  const cityMatch = villeWords.length === 0 || villeWords.some(kw => addrLow.includes(kw) || nameLow.includes(kw));
 
-  // Filtre sectoriel : le nom doit contenir un mot-clé du secteur (optionnel, warn seulement)
-  const sectorKey = Object.keys(SECTEUR_KEYWORDS).find(k => secteur.toLowerCase().includes(k));
-  const keywords = sectorKey ? SECTEUR_KEYWORDS[sectorKey] : [];
-  const sectorMatch = keywords.length === 0 || keywords.some(kw => nameLow.includes(kw));
+  // Filtre sectoriel souple : on exclut uniquement les faux positifs évidents (alimentaire ≠ photo, etc.)
+  const HARD_EXCLUDE: Record<string, string[]> = {
+    photographe: ['boulangerie', 'patisserie', 'restaurant', 'coiffeur', 'pharmacie', 'maraich'],
+    restaurateur: ['photographe', 'coiffeur', 'fleuriste', 'pharmacie'],
+    fleuriste: ['photographe', 'restaurant', 'coiffeur', 'pharmacie'],
+    coiffeur: ['photographe', 'restaurant', 'fleuriste', 'pharmacie', 'boulangerie'],
+    boulangerie: ['photographe', 'coiffeur', 'fleuriste'],
+  };
+  const sectorKey = Object.keys(HARD_EXCLUDE).find(k => secteur.toLowerCase().includes(k));
+  const excluded = sectorKey ? HARD_EXCLUDE[sectorKey] : [];
+  const notExcluded = excluded.length === 0 || !excluded.some(kw => nameLow.includes(kw));
 
-  // On garde si la ville correspond ET (secteur correspond ou pas de filtre secteur)
-  // Si la ville ne correspond pas du tout → on rejette
-  return cityMatch && (sectorMatch || keywords.length === 0);
+  return cityMatch && notExcluded;
 }
 
 const EMAIL_BLACKLIST = ['sentry', 'wixpress', 'example', 'domain', '@2x', 'noreply', 'no-reply', 'placeholder', 'schema', 'pixel', 'amazonaws', '.png', '.jpg', '.gif', 'support@wix'];
