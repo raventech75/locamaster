@@ -1,6 +1,21 @@
 ---
 import { faqItems } from '../data/faq';
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqItems.map((item) => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": item.reponse,
+    },
+  })),
+};
 ---
+
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 
 <section class="section-pad bg-surface" aria-labelledby="faq-titre" id="faq">
   <div class="container-site">

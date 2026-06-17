@@ -8,6 +8,11 @@ import { ViewTransitions } from 'astro:transitions';
 import FloatingContact from '../components/FloatingContact.astro';
 import StickyMobileBar from '../components/StickyMobileBar.astro';
 
+interface BreadcrumbItem {
+  name: string;
+  url: string;
+}
+
 interface Props {
   title: string;
   description?: string;
@@ -15,6 +20,7 @@ interface Props {
   canonical?: string;
   noIndex?: boolean;
   schema?: object;
+  breadcrumbs?: BreadcrumbItem[];
 }
 
 const {
@@ -24,11 +30,28 @@ const {
   canonical,
   noIndex = false,
   schema,
+  breadcrumbs,
 } = Astro.props;
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://locamaster.fr';
 const canonicalUrl = canonical ? `${siteUrl}${canonical}` : `${siteUrl}${Astro.url.pathname}`;
 const fullTitle = title === 'Locamaster' ? title : `${title} — Locamaster`;
+
+const breadcrumbSchema = breadcrumbs && breadcrumbs.length > 0
+  ? {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Accueil", "item": siteUrl },
+        ...breadcrumbs.map((crumb, i) => ({
+          "@type": "ListItem",
+          "position": i + 2,
+          "name": crumb.name,
+          "item": `${siteUrl}${crumb.url}`,
+        })),
+      ],
+    }
+  : null;
 ---
 
 <!doctype html>
@@ -65,35 +88,52 @@ const fullTitle = title === 'Locamaster' ? title : `${title} — Locamaster`;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
-    <!-- JSON-LD Schema -->
+    <!-- JSON-LD Schema page-specific -->
     {schema && (
       <script type="application/ld+json" set:html={JSON.stringify(schema)} />
     )}
 
-    <!-- Schema Organisation par défaut -->
+    <!-- BreadcrumbList -->
+    {breadcrumbSchema && (
+      <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+    )}
+
+    <!-- LocalBusiness Schema — présent sur toutes les pages -->
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
+      "@id": `${siteUrl}/#localbusiness`,
       "name": "Locamaster",
       "description": "Studio de branding, photo et vidéo pour les commerces et professionnels locaux en Île-de-France.",
       "url": siteUrl,
-      "telephone": "+33 1 85 09 45 42",
+      "telephone": "+33185094542",
       "email": "contact@locamaster.fr",
+      "logo": `${siteUrl}/favicon.svg`,
+      "image": `${siteUrl}/images/og-default.jpg`,
       "address": {
         "@type": "PostalAddress",
         "addressRegion": "Île-de-France",
         "addressCountry": "FR"
       },
-      "areaServed": {
-        "@type": "GeoCircle",
-        "geoMidpoint": {
-          "@type": "GeoCoordinates",
-          "latitude": 48.8566,
-          "longitude": 2.3522
-        },
-        "geoRadius": "80000"
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 48.8566,
+        "longitude": 2.3522
       },
+      "areaServed": [
+        { "@type": "City", "name": "Paris" },
+        { "@type": "AdministrativeArea", "name": "Île-de-France" }
+      ],
       "priceRange": "€€",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Services Locamaster",
+        "itemListElement": [
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Photographie professionnelle" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Vidéo pour les réseaux sociaux" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Branding & identité visuelle" } },
+        ]
+      },
       "sameAs": [
         "https://www.instagram.com/locamaster"
       ]

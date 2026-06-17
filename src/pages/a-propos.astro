@@ -3,12 +3,33 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
 import CTAFinale from '../sections/CTAFinale.astro';
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "À propos de Locamaster",
+  "description": "Vidéaste et photographe basé en Île-de-France, fondateur de Locamaster, studio visuel pour artisans et commerçants locaux.",
+  "url": "https://www.locamaster.fr/a-propos",
+  "mainEntity": {
+    "@type": "Person",
+    "name": "Fondateur Locamaster",
+    "jobTitle": "Vidéaste et photographe",
+    "worksFor": {
+      "@type": "LocalBusiness",
+      "@id": "https://www.locamaster.fr/#localbusiness",
+      "name": "Locamaster"
+    },
+    "knowsAbout": ["Photographie professionnelle", "Vidéo corporate", "Branding", "Identité visuelle", "Réseaux sociaux"]
+  }
+};
 ---
 
 <BaseLayout
-  title="À propos"
-  description="Locamaster — studio visuel solo pour artisans et entreprises locales en Île-de-France. Vidéaste et photographe premium, spécialisé en branding artisanal."
+  title="À propos — Photographe & vidéaste pour artisans en Île-de-France"
+  description="Derrière Locamaster, un seul interlocuteur : vidéaste et photographe basé en Île-de-France, spécialisé dans le branding visuel des artisans, restaurateurs et commerçants locaux."
   canonical="/a-propos"
+  breadcrumbs={[{ name: "À propos", url: "/a-propos" }]}
+  schema={schema}
 >
   <Navigation variant="solid" />
   <main id="main-content">
@@ -56,7 +77,7 @@ import CTAFinale from '../sections/CTAFinale.astro';
               <!-- Photo du fondateur — déposer le fichier dans public/images/founder.jpg -->
               <img
                 src="/images/founder.jpg"
-                alt="Le fondateur de Locamaster"
+                alt="Le fondateur de Locamaster — vidéaste et photographe pour artisans en Île-de-France"
                 class="w-full h-full object-cover object-center"
                 width="600"
                 height="800"

@@ -5,12 +5,29 @@ import Footer from '../components/Footer.astro';
 
 // Lire le param ?offre= pour pré-sélectionner une offre
 const offreParam = Astro.url.searchParams.get('offre') || '';
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "Devis gratuit Locamaster",
+  "description": "Demandez votre devis photo, vidéo ou branding à Locamaster pour artisans en Île-de-France.",
+  "url": "https://www.locamaster.fr/contact",
+  "mainEntity": {
+    "@type": "LocalBusiness",
+    "@id": "https://www.locamaster.fr/#localbusiness",
+    "name": "Locamaster",
+    "telephone": "+33185094542",
+    "email": "contact@locamaster.fr"
+  }
+};
 ---
 
 <BaseLayout
-  title="Contact & Devis"
-  description="Demandez un devis gratuit à Locamaster. Photo, vidéo et branding pour artisans en Île-de-France. Réponse sous 24h."
+  title="Devis gratuit — Photo, vidéo & branding pour artisans Île-de-France"
+  description="Demandez votre devis personnalisé à Locamaster. Photo professionnelle, vidéo réseaux sociaux et branding pour artisans et commerçants en Île-de-France. Réponse sous 24h."
   canonical="/contact"
+  breadcrumbs={[{ name: "Contact & Devis", url: "/contact" }]}
+  schema={schema}
 >
   <Navigation variant="solid" />
   <main id="main-content">
