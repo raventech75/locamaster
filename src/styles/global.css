@@ -329,6 +329,27 @@ html.lenis body {
   }
 }
 
+/* ----------------------------------------------------------------
+   Respect de prefers-reduced-motion pour toutes les animations
+   ---------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+  .animate-fade-in {
+    animation: none;
+    opacity: 1;
+  }
+  .animate-slide-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .animate-pulse {
+    animation: none;
+  }
+}
+
 /* Révision d'asset — change le hash du bundle CSS pour invalider une
    redirection 308 mise en cache (Chrome). Incrémenter si besoin. */
 :root { --lm-asset-rev: 2; }

@@ -118,7 +118,7 @@ function isActive(href: string) {
             <a
               href={link.href}
               class:list={[
-                'block px-4 py-3 text-base font-sans font-semibold rounded-lg transition-colors duration-200',
+                'relative block px-4 py-3 text-base font-sans font-semibold rounded-lg transition-colors duration-200',
                 isActive(link.href)
                   ? 'text-ink bg-accent-soft'
                   : 'text-ink-2 hover:text-ink hover:bg-surface',
@@ -126,6 +126,9 @@ function isActive(href: string) {
               aria-current={isActive(link.href) ? 'page' : undefined}
             >
               {link.label}
+              {isActive(link.href) && (
+                <span class="absolute left-4 bottom-1.5 right-4 h-0.5 bg-accent rounded-full" aria-hidden="true"></span>
+              )}
             </a>
           </li>
         ))}

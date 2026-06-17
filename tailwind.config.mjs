@@ -13,7 +13,7 @@ export default {
         // Encre quasi-noire, chaude
         ink: '#15120D',
         'ink-2': '#3D362B',
-        muted: '#857B6A',
+        muted: '#766D5D',
         // Accent miel doré — punchy, saturé
         accent: '#F2B01E',
         'accent-hover': '#DC9C0A',
@@ -27,7 +27,7 @@ export default {
         sans: ['"Inter Variable"', '"Inter"', 'system-ui', 'sans-serif'],
       },
       fontSize: {
-        '2xs': ['0.6875rem', { lineHeight: '1rem' }],
+        '2xs': ['0.75rem', { lineHeight: '1.125rem' }],
         '5xl': ['3rem', { lineHeight: '1.02' }],
         '6xl': ['3.75rem', { lineHeight: '0.98' }],
         '7xl': ['4.75rem', { lineHeight: '0.94' }],
