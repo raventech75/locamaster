@@ -127,16 +127,35 @@ function initPage() {
       opacity: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.1, delay: 0.05,
     });
 
-    // Split-word animation sur le H1 hero
+    // Split-word animation sur le H1 hero — parcourt uniquement les text nodes
     const h1 = hero.querySelector('h1[data-hero-el]') as HTMLElement | null;
     if (h1) {
-      // Enveloppe chaque mot dans un span pour l'animation
-      const rawHTML = h1.innerHTML;
-      const splitHTML = rawHTML.replace(
-        /([^\s<>]+)/g,
-        (word) => `<span class="word-wrap" style="display:inline-block;overflow:hidden;vertical-align:bottom"><span class="word-inner" style="display:inline-block">${word}</span></span>`
-      );
-      h1.innerHTML = splitHTML;
+      const walker = document.createTreeWalker(h1, NodeFilter.SHOW_TEXT);
+      const textNodes: Text[] = [];
+      let tn: Text | null;
+      while ((tn = walker.nextNode() as Text | null)) textNodes.push(tn);
+
+      textNodes.forEach((textNode) => {
+        const parts = textNode.textContent?.split(/(\s+)/) ?? [];
+        const frag = document.createDocumentFragment();
+        parts.forEach((part) => {
+          if (/^\s+$/.test(part)) {
+            frag.appendChild(document.createTextNode(part));
+          } else if (part) {
+            const wrap = document.createElement('span');
+            wrap.className = 'word-wrap';
+            wrap.style.cssText = 'display:inline-block;overflow:hidden;vertical-align:bottom';
+            const inner = document.createElement('span');
+            inner.className = 'word-inner';
+            inner.style.cssText = 'display:inline-block';
+            inner.textContent = part;
+            wrap.appendChild(inner);
+            frag.appendChild(wrap);
+          }
+        });
+        textNode.parentNode?.replaceChild(frag, textNode);
+      });
+
       const words = h1.querySelectorAll<HTMLElement>('.word-inner');
       gsap.set(words, { y: '110%' });
       gsap.to(words, {
