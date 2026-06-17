@@ -1,6 +1,44 @@
 import { motion } from 'framer-motion';
 
 const MIEL = '#F2B01E';
+const INK = '#15120D';
+
+// Icônes SVG sur fond accent — remplacent les emojis
+function IconBadge({ type }: { type: 'camera' | 'video' | 'star' }) {
+  const icons = {
+    camera: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+    ),
+    video: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={INK} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="23 7 16 12 23 17 23 7"/>
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+      </svg>
+    ),
+    star: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill={INK} stroke="none">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    ),
+  };
+  return (
+    <div style={{
+      width: 30,
+      height: 30,
+      borderRadius: 8,
+      backgroundColor: MIEL,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    }}>
+      {icons[type]}
+    </div>
+  );
+}
 
 // SVG filter pour l'effet verre liquide
 function GlassFilter() {
@@ -49,10 +87,10 @@ function GlassCard({ children, className = '' }: { children: React.ReactNode; cl
   );
 }
 
-const CARDS = [
+const CARDS: { icon: 'camera' | 'video' | 'star'; title: string; sub: string; delay: number; x: string; y: string; rotate: number }[] = [
   {
-    icon: '🎬',
-    title: 'Tournage terminé',
+    icon: 'video',
+    title: 'Vidéo livrée — 5 jours',
     sub: 'Le Clos des Saveurs · Restaurant',
     delay: 0.3,
     x: '-8%',
@@ -60,8 +98,8 @@ const CARDS = [
     rotate: -3,
   },
   {
-    icon: '📸',
-    title: '54 photos livrées',
+    icon: 'camera',
+    title: '20 photos retouchées',
     sub: 'Atelier Blanc · Fleuriste Paris 11',
     delay: 0.7,
     x: '5%',
@@ -69,8 +107,8 @@ const CARDS = [
     rotate: 2,
   },
   {
-    icon: '⭐',
-    title: '5/5 · Résultat bluffant !',
+    icon: 'star',
+    title: '5/5 — Résultat bluffant',
     sub: 'La Bouquinerie · Librairie',
     delay: 1.1,
     x: '-12%',
@@ -97,7 +135,7 @@ export default function HeroGlassCards() {
             transition={{ duration: 3 + i * 0.7, repeat: Infinity, ease: 'easeInOut', delay: i * 0.4 }}
           >
             <GlassCard className="px-3 py-2.5 flex items-center gap-2.5 min-w-[170px]">
-              <span style={{ fontSize: 20 }}>{card.icon}</span>
+              <IconBadge type={card.icon} />
               <div>
                 <p style={{ color: '#15120D', fontSize: 11, fontWeight: 700, lineHeight: 1.2, letterSpacing: 0.2 }}>
                   {card.title}
