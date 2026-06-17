@@ -58,7 +58,7 @@ export const projets: Projet[] = [
     resultat:
       "Un portfolio vivant qui attire les commandes événementielles haut de gamme. Chiffre d'affaires événementiel en forte progression.",
     livrables: ["Logo + charte", "20 photos produit", "1 vidéo atelier", "3 Reels", "Déclinaisons réseaux"],
-    imageCover: "https://images.unsplash.com/photo-1487530811015-780780169cec?w=800&q=80",
+    imageCover: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80",
     galerie: [
       "https://images.unsplash.com/photo-1457089328109-e5d9bd499191?w=800&q=80",
       "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&q=80",
