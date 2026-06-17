@@ -6,6 +6,7 @@ import Offres from '../sections/Offres.astro';
 import SessionDecouverte from '../sections/SessionDecouverte.astro';
 import CTAFinale from '../sections/CTAFinale.astro';
 import FAQ from '../sections/FAQ.astro';
+import LeadMagnet from '../components/LeadMagnet.astro';
 ---
 
 <BaseLayout
@@ -28,10 +29,25 @@ import FAQ from '../sections/FAQ.astro';
           Des offres claires,<br />
           des résultats réels.
         </h1>
-        <p class="text-lead max-w-xl">
+        <p class="text-lead max-w-xl mb-8">
           Tout est affiché. Pas de surprises en cours de route, pas de coûts cachés.
           Vous savez ce que vous payez avant de signer.
         </p>
+
+        <!-- ROI framing -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { chiffre: '1', label: 'nouveau client régulier', detail: 'suffit à rentabiliser la session découverte à 190 €' },
+            { chiffre: '+42 %', label: 'de clics Google Maps', detail: 'en moyenne avec des photos professionnelles vs. photos téléphone' },
+            { chiffre: '5 j', label: 'délai de livraison', detail: 'pour recevoir vos livrables finaux, retouchés et prêts à publier' },
+          ].map((stat) => (
+            <div class="bg-white rounded-xl border border-border p-5">
+              <div class="font-display text-2xl font-medium text-accent mb-1">{stat.chiffre}</div>
+              <div class="text-sm font-medium text-ink mb-1">{stat.label}</div>
+              <div class="text-xs text-muted leading-relaxed">{stat.detail}</div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
 
@@ -57,6 +73,7 @@ import FAQ from '../sections/FAQ.astro';
       </div>
     </section>
 
+    <LeadMagnet />
     <FAQ />
     <CTAFinale />
   </main>

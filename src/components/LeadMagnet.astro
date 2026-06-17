@@ -1,0 +1,97 @@
+---
+// Lead magnet — Guide gratuit "5 erreurs photo qui font fuir vos clients"
+// CTA : email capture → /api/contact avec besoin=guide-gratuit
+---
+
+<section class="bg-ink py-12 md:py-16" aria-labelledby="lead-magnet-titre">
+  <div class="container-site">
+    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-12 items-center">
+
+      <!-- Texte -->
+      <div class="md:col-span-3">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="inline-block w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+          <span class="text-xs font-sans font-medium tracking-widest uppercase text-accent">Guide gratuit</span>
+        </div>
+        <h2 id="lead-magnet-titre" class="font-display text-2xl md:text-3xl font-medium text-white mb-4 leading-tight">
+          5 erreurs photo qui font fuir vos clients — avant même qu'ils vous contactent.
+        </h2>
+        <p class="text-white/60 text-sm leading-relaxed mb-1">
+          Un guide concret rédigé à partir de centaines de fiches Google et profils Instagram
+          d'artisans et commerçants en Île-de-France. Ce qui coûte des clients sans qu'on le sache.
+        </p>
+      </div>
+
+      <!-- Formulaire -->
+      <div class="md:col-span-2">
+        <form id="lead-magnet-form" class="flex flex-col gap-3">
+          <input
+            type="email"
+            id="lm-email"
+            name="email"
+            required
+            autocomplete="email"
+            placeholder="votre@email.fr"
+            class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/40 transition-colors duration-200"
+          />
+          <button
+            type="submit"
+            id="lm-btn"
+            class="btn-accent w-full justify-center py-3 text-sm"
+          >
+            <span id="lm-label">Recevoir le guide gratuitement</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </button>
+          <p class="text-xs text-white/30 text-center">Aucun spam. Désabonnement en un clic.</p>
+        </form>
+        <div id="lm-success" class="hidden text-center py-6">
+          <svg class="w-10 h-10 text-accent mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-white font-medium text-sm">Guide envoyé !</p>
+          <p class="text-white/50 text-xs mt-1">Vérifiez votre boîte mail (et les spams).</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  function initLeadMagnet() {
+    const form = document.getElementById('lead-magnet-form') as HTMLFormElement;
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('lm-btn') as HTMLButtonElement;
+      const label = document.getElementById('lm-label');
+      const email = (document.getElementById('lm-email') as HTMLInputElement).value;
+
+      btn.disabled = true;
+      if (label) label.textContent = 'Envoi…';
+
+      try {
+        await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nom: 'Guide gratuit',
+            email,
+            besoin: 'guide-gratuit',
+            message: "Demande de guide : 5 erreurs photo qui font fuir vos clients.",
+          }),
+        });
+        form.classList.add('hidden');
+        document.getElementById('lm-success')?.classList.remove('hidden');
+      } catch {
+        btn.disabled = false;
+        if (label) label.textContent = 'Recevoir le guide gratuitement';
+      }
+    });
+  }
+
+  document.addEventListener('astro:page-load', initLeadMagnet);
+</script>
