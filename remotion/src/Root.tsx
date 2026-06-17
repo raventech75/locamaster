@@ -2,7 +2,17 @@ import { Composition } from 'remotion';
 import { SocialPromo, socialPromoSchema } from './compositions/SocialPromo';
 import { LogoSting } from './compositions/LogoSting';
 import { OffreReveal, offreRevealSchema } from './compositions/OffreReveal';
+import { BeforeAfter, beforeAfterSchema } from './compositions/BeforeAfter';
 import { packs, abonnements, cas } from './data';
+
+const secteurBeforeAfters = [
+  { id: 'restaurant', secteur: 'Restaurateur', resultLabel: '+42 % de clics Google Maps' },
+  { id: 'fleuriste',  secteur: 'Fleuriste',    resultLabel: '+38 % de visites en boutique' },
+  { id: 'coiffeur',   secteur: 'Coiffeur',     resultLabel: '+55 % de prises de RDV' },
+  { id: 'artisan',    secteur: 'Artisan',      resultLabel: '+3× de demandes de devis' },
+  { id: 'antiquaire', secteur: 'Antiquaire',   resultLabel: "+60 % d'engagement Instagram" },
+  { id: 'libraire',   secteur: 'Libraire',     resultLabel: '+45 % de trafic en boutique' },
+];
 
 /**
  * Catalogue des vidéos Locamaster.
@@ -123,6 +133,45 @@ export const RemotionRoot: React.FC = () => {
             subtitle: c.subtitle,
             ctaLabel: c.ctaLabel,
             ctaPrice: c.ctaPrice,
+          }}
+        />
+      ))}
+
+      {/* ---- Avant/Après par secteur (9:16 Reels/TikTok) ---- */}
+      <Composition
+        id="BeforeAfter"
+        component={BeforeAfter}
+        durationInFrames={300}
+        fps={30}
+        width={1080}
+        height={1920}
+        schema={beforeAfterSchema}
+        defaultProps={{
+          beforeUrl: '',
+          afterUrl: '',
+          secteur: 'Restaurateur',
+          resultLabel: '+42 % de clics Google Maps',
+          ctaLabel: 'Session Découverte',
+          ctaPrice: '190 € HT',
+        }}
+      />
+      {secteurBeforeAfters.map((s) => (
+        <Composition
+          key={`BeforeAfter-${s.id}`}
+          id={`BeforeAfter-${s.id}`}
+          component={BeforeAfter}
+          durationInFrames={300}
+          fps={30}
+          width={1080}
+          height={1920}
+          schema={beforeAfterSchema}
+          defaultProps={{
+            beforeUrl: '',
+            afterUrl: '',
+            secteur: s.secteur,
+            resultLabel: s.resultLabel,
+            ctaLabel: 'Session Découverte',
+            ctaPrice: '190 € HT',
           }}
         />
       ))}

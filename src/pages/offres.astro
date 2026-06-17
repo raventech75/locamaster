@@ -34,19 +34,26 @@ import LeadMagnet from '../components/LeadMagnet.astro';
           Vous savez ce que vous payez avant de signer.
         </p>
 
-        <!-- ROI framing -->
+        <!-- ROI framing avec compteurs animés -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { chiffre: '1', label: 'nouveau client régulier', detail: 'suffit à rentabiliser la session découverte à 190 €' },
-            { chiffre: '+42 %', label: 'de clics Google Maps', detail: 'en moyenne avec des photos professionnelles vs. photos téléphone' },
-            { chiffre: '5 j', label: 'délai de livraison', detail: 'pour recevoir vos livrables finaux, retouchés et prêts à publier' },
-          ].map((stat) => (
-            <div class="bg-white rounded-xl border border-border p-5">
-              <div class="font-display text-2xl font-medium text-accent mb-1">{stat.chiffre}</div>
-              <div class="text-sm font-medium text-ink mb-1">{stat.label}</div>
-              <div class="text-xs text-muted leading-relaxed">{stat.detail}</div>
-            </div>
-          ))}
+          <div class="bg-white rounded-xl border border-border p-5">
+            <div class="font-display text-2xl font-medium text-accent mb-1"
+              data-count="1" data-count-prefix="" data-count-suffix=" client">1 client</div>
+            <div class="text-sm font-medium text-ink mb-1">nouveau client régulier</div>
+            <div class="text-xs text-muted leading-relaxed">suffit à rentabiliser la session découverte à 190 €</div>
+          </div>
+          <div class="bg-white rounded-xl border border-border p-5">
+            <div class="font-display text-2xl font-medium text-accent mb-1"
+              data-count="42" data-count-prefix="+" data-count-suffix=" %">+42 %</div>
+            <div class="text-sm font-medium text-ink mb-1">de clics Google Maps</div>
+            <div class="text-xs text-muted leading-relaxed">en moyenne avec des photos professionnelles vs. photos téléphone</div>
+          </div>
+          <div class="bg-white rounded-xl border border-border p-5">
+            <div class="font-display text-2xl font-medium text-accent mb-1"
+              data-count="5" data-count-prefix="" data-count-suffix=" jours">5 jours</div>
+            <div class="text-sm font-medium text-ink mb-1">délai de livraison</div>
+            <div class="text-xs text-muted leading-relaxed">pour recevoir vos livrables finaux, retouchés et prêts à publier</div>
+          </div>
         </div>
       </div>
     </div>

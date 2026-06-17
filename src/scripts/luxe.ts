@@ -118,13 +118,42 @@ function initPage() {
     });
   });
 
-  // 1. Hero — timeline d'entrée
+  // 1. Hero — timeline d'entrée + split-word H1 + underline draw
   const hero = document.querySelector('[data-hero]');
   if (hero) {
     const heroEls = hero.querySelectorAll('[data-hero-el]');
     gsap.set(heroEls, { opacity: 0, y: 30 });
     gsap.to(heroEls, {
       opacity: 1, y: 0, duration: 1, ease: 'power3.out', stagger: 0.1, delay: 0.05,
+    });
+
+    // Split-word animation sur le H1 hero
+    const h1 = hero.querySelector('h1[data-hero-el]') as HTMLElement | null;
+    if (h1) {
+      // Enveloppe chaque mot dans un span pour l'animation
+      const rawHTML = h1.innerHTML;
+      const splitHTML = rawHTML.replace(
+        /([^\s<>]+)/g,
+        (word) => `<span class="word-wrap" style="display:inline-block;overflow:hidden;vertical-align:bottom"><span class="word-inner" style="display:inline-block">${word}</span></span>`
+      );
+      h1.innerHTML = splitHTML;
+      const words = h1.querySelectorAll<HTMLElement>('.word-inner');
+      gsap.set(words, { y: '110%' });
+      gsap.to(words, {
+        y: '0%', duration: 0.85, ease: 'power4.out', stagger: 0.045, delay: 0.15,
+      });
+    }
+
+    // Underline draw animée sur .highlight (le mot "vu")
+    const highlights = hero.querySelectorAll<HTMLElement>('.highlight');
+    highlights.forEach((el) => {
+      gsap.fromTo(el,
+        { '--ul-width': '0%' },
+        {
+          '--ul-width': '100%', duration: 0.7, ease: 'power3.out', delay: 0.9,
+          onStart: () => { el.style.setProperty('--ul-width', '0%'); },
+        }
+      );
     });
   }
 
