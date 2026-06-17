@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import { secteurs } from '../../data/secteurs';
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Secteurs accompagnés — Locamaster",
+  "description": "Photo et vidéo professionnelles pour restaurateurs, fleuristes, coiffeurs, artisans, antiquaires et libraires en Île-de-France.",
+  "url": "https://www.locamaster.fr/secteurs",
+  "provider": {
+    "@type": "LocalBusiness",
+    "@id": "https://www.locamaster.fr/#localbusiness",
+    "name": "Locamaster"
+  }
+};
+---
+
+<BaseLayout
+  title="Secteurs accompagnés — Photo & vidéo par métier en Île-de-France"
+  description="Locamaster accompagne restaurateurs, fleuristes, coiffeurs, artisans, antiquaires et libraires en Île-de-France. Découvrez les solutions visuelles adaptées à chaque secteur."
+  canonical="/secteurs"
+  breadcrumbs={[{ name: "Secteurs", url: "/secteurs" }]}
+  schema={schema}
+>
+  <Navigation variant="solid" />
+  <main id="main-content">
+
+    <!-- Hero -->
+    <div class="bg-surface section-pad-sm">
+      <div class="container-site max-w-3xl">
+        <div class="flex items-center gap-3 mb-5">
+          <span class="accent-line" aria-hidden="true" />
+          <span class="section-label">Pour qui</span>
+        </div>
+        <h1 class="font-display text-ink mb-5">
+          Les métiers que<br />j'accompagne.
+        </h1>
+        <p class="text-lead max-w-xl">
+          Chaque secteur a ses particularités — ses clients, ses codes visuels, ses réseaux.
+          Voici comment je travaille pour chaque métier.
+        </p>
+      </div>
+    </div>
+
+    <!-- Grille secteurs -->
+    <section class="section-pad bg-bg">
+      <div class="container-site">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {secteurs.map((s) => (
+            <a
+              href={`/secteurs/${s.slug}`}
+              class="group block bg-white rounded-xl border border-border hover:border-ink hover:shadow-md transition-all duration-300 overflow-hidden"
+            >
+              <div class="p-7">
+                <div class="flex items-center gap-3 mb-5">
+                  <span class="text-3xl" role="img" aria-label={s.nom}>{s.emoji}</span>
+                  <h2 class="font-display text-lg font-medium text-ink capitalize">
+                    {s.nomPluriel}
+                  </h2>
+                </div>
+                <p class="text-sm text-ink-2 leading-relaxed mb-5">
+                  {s.accroche}
+                </p>
+                <ul class="flex flex-col gap-1.5 mb-6">
+                  {s.solutions.slice(0, 3).map((sol) => (
+                    <li class="flex items-center gap-2 text-xs text-ink-2">
+                      <svg class="w-3.5 h-3.5 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {sol.titre}
+                    </li>
+                  ))}
+                </ul>
+                <div class="flex items-center gap-1 text-accent text-sm font-medium group-hover:gap-2 transition-all duration-200">
+                  Voir les solutions
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        <!-- Autre métier -->
+        <div class="mt-10 max-w-2xl mx-auto text-center">
+          <div class="card-surface">
+            <p class="text-ink-2 text-sm leading-relaxed mb-4">
+              Votre métier n'est pas listé ? Je travaille avec tous les commerces et professionnels locaux
+              d'Île-de-France. Restaurateurs, boulangers, architectes, thérapeutes, coachs, photographes...
+            </p>
+            <a href="/contact" class="btn-accent">
+              Parlez-moi de votre projet
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA rapide -->
+    <section class="section-pad-sm bg-ink">
+      <div class="container-site max-w-2xl text-center">
+        <h2 class="font-display text-2xl text-white mb-4">
+          Commencez par une session découverte.
+        </h2>
+        <p class="text-white/60 text-sm leading-relaxed mb-8 max-w-lg mx-auto">
+          190 € HT. 45 à 60 min sur votre lieu de travail. 5 photos + 1 vidéo en 5 jours.
+          Résultat garanti ou recommencé sans frais.
+        </p>
+        <a href="/contact?offre=session-decouverte" class="btn-accent">
+          Réserver ma session
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</BaseLayout>

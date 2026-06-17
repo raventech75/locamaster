@@ -1,0 +1,336 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Calculateur ROI photo professionnelle — Locamaster",
+  "description": "Calculez combien vous coûte l'absence de photos professionnelles et le retour sur investissement d'une session découverte à 190€ HT.",
+  "url": "https://www.locamaster.fr/outils/calculateur-roi",
+  "provider": {
+    "@type": "LocalBusiness",
+    "@id": "https://www.locamaster.fr/#localbusiness",
+    "name": "Locamaster"
+  },
+  "applicationCategory": "BusinessApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  }
+};
+---
+
+<BaseLayout
+  title="Calculateur ROI — Combien vous coûte l'absence de photos pro ?"
+  description="Calculez en 30 secondes combien l'absence de photos professionnelles vous coûte chaque mois. Outil gratuit Locamaster pour artisans et commerçants en Île-de-France."
+  canonical="/outils/calculateur-roi"
+  breadcrumbs={[
+    { name: "Outils", url: "/outils" },
+    { name: "Calculateur ROI", url: "/outils/calculateur-roi" }
+  ]}
+  schema={schema}
+>
+  <Navigation variant="solid" />
+  <main id="main-content">
+
+    <!-- Hero -->
+    <div class="bg-surface section-pad-sm">
+      <div class="container-site max-w-3xl">
+        <div class="flex items-center gap-3 mb-5">
+          <span class="accent-line" aria-hidden="true" />
+          <span class="section-label">Outil gratuit</span>
+        </div>
+        <h1 class="font-display text-ink mb-4">
+          Combien vous coûte l'absence<br class="hidden sm:block" />
+          de photos professionnelles ?
+        </h1>
+        <p class="text-lead max-w-xl">
+          Entrez 3 chiffres. Le calculateur vous montre votre CA manqué chaque mois
+          et combien de temps il faut pour rentabiliser une session photo.
+        </p>
+      </div>
+    </div>
+
+    <!-- Calculateur -->
+    <section class="section-pad bg-bg" aria-labelledby="calc-titre">
+      <div class="container-site">
+        <div class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+
+          <!-- Formulaire -->
+          <div>
+            <h2 id="calc-titre" class="font-display text-xl text-ink mb-8">Vos données</h2>
+
+            <div class="flex flex-col gap-7">
+              <!-- Visiteurs/mois -->
+              <div>
+                <label class="form-label" for="visiteurs">
+                  Visiteurs par mois sur votre fiche Google
+                  <span class="text-muted font-normal normal-case tracking-normal ml-1">(profil + maps)</span>
+                </label>
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="visiteurs"
+                    name="visiteurs"
+                    min="10"
+                    max="50000"
+                    value="500"
+                    class="form-input pr-24"
+                  />
+                  <span class="absolute right-3 inset-y-0 flex items-center text-sm text-muted pointer-events-none">visiteurs</span>
+                </div>
+                <p class="text-xs text-muted mt-1.5">
+                  Visible dans Google Business Profile → "Statistiques" → "Vues du profil".
+                  Si inconnu, laissez 500.
+                </p>
+              </div>
+
+              <!-- Taux de conversion actuel -->
+              <div>
+                <label class="form-label" for="taux-actuel">
+                  Taux de conversion actuel
+                  <span class="text-muted font-normal normal-case tracking-normal ml-1">(visiteurs → clients)</span>
+                </label>
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="taux-actuel"
+                    name="taux-actuel"
+                    min="0.1"
+                    max="20"
+                    step="0.1"
+                    value="2"
+                    class="form-input pr-8"
+                  />
+                  <span class="absolute right-3 inset-y-0 flex items-center text-sm text-muted pointer-events-none">%</span>
+                </div>
+                <p class="text-xs text-muted mt-1.5">
+                  Un commerce local moyen convertit entre 1 % et 4 % de ses visiteurs Google.
+                  Avec des photos pro, ce taux monte souvent à +42 %.
+                </p>
+              </div>
+
+              <!-- Valeur client -->
+              <div>
+                <label class="form-label" for="valeur-client">
+                  Valeur moyenne d'un nouveau client
+                  <span class="text-muted font-normal normal-case tracking-normal ml-1">(première transaction)</span>
+                </label>
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="valeur-client"
+                    name="valeur-client"
+                    min="10"
+                    max="50000"
+                    step="10"
+                    value="150"
+                    class="form-input pr-8"
+                  />
+                  <span class="absolute right-3 inset-y-0 flex items-center text-sm text-muted pointer-events-none">€</span>
+                </div>
+                <p class="text-xs text-muted mt-1.5">
+                  Montant HT d'une première commande ou visite type.
+                  Restaurant : 30–60 €. Coiffeur : 50–120 €. Artisan : 500–5 000 €.
+                </p>
+              </div>
+
+              <!-- Valeur vie client (optionnel) -->
+              <div>
+                <label class="form-label" for="retention">
+                  Combien de fois un client revient (par an)
+                </label>
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="retention"
+                    name="retention"
+                    min="1"
+                    max="52"
+                    step="1"
+                    value="4"
+                    class="form-input pr-12"
+                  />
+                  <span class="absolute right-3 inset-y-0 flex items-center text-sm text-muted pointer-events-none">fois</span>
+                </div>
+                <p class="text-xs text-muted mt-1.5">
+                  Restaurant régulier : 8–20×. Coiffeur : 4–8×. Artisan ponctuel : 1×.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Résultats -->
+          <div>
+            <h2 class="font-display text-xl text-ink mb-8">Votre résultat</h2>
+
+            <div id="results" class="flex flex-col gap-5">
+
+              <!-- Situation actuelle -->
+              <div class="card p-6 border-2 border-border">
+                <h3 class="text-xs font-sans font-medium tracking-widest uppercase text-muted mb-4">
+                  Situation actuelle (sans photos pro)
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div id="r-clients-actuels" class="font-display text-2xl font-medium text-ink">10</div>
+                    <div class="text-xs text-ink-2 mt-0.5">clients/mois actuels</div>
+                  </div>
+                  <div>
+                    <div id="r-ca-actuel" class="font-display text-2xl font-medium text-ink">1 500 €</div>
+                    <div class="text-xs text-ink-2 mt-0.5">CA premier contact/mois</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Avec photos pro -->
+              <div class="card p-6 border-2 border-accent bg-accent-soft">
+                <h3 class="text-xs font-sans font-medium tracking-widest uppercase text-accent-text mb-4">
+                  Avec photos professionnelles (+42 % conversion)
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <div id="r-clients-pro" class="font-display text-2xl font-medium text-ink">14</div>
+                    <div class="text-xs text-ink-2 mt-0.5">clients/mois estimés</div>
+                  </div>
+                  <div>
+                    <div id="r-ca-pro" class="font-display text-2xl font-medium text-ink">2 130 €</div>
+                    <div class="text-xs text-ink-2 mt-0.5">CA premier contact/mois</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gain mensuel -->
+              <div class="bg-ink rounded-xl p-6 text-white">
+                <div class="flex items-start justify-between gap-4 mb-4">
+                  <h3 class="text-xs font-sans font-medium tracking-widest uppercase text-white/50">
+                    Gain mensuel estimé
+                  </h3>
+                </div>
+                <div id="r-gain-mensuel" class="font-display text-4xl font-medium text-accent mb-1">
+                  + 630 €
+                </div>
+                <div class="text-sm text-white/60">en CA premier contact par mois</div>
+
+                <div class="mt-5 pt-5 border-t border-white/10">
+                  <div class="text-sm text-white/80 mb-1">
+                    ROI de la session découverte à 190 € :
+                  </div>
+                  <div id="r-roi" class="font-display text-2xl font-medium text-white">
+                    rentabilisée en 9 jours
+                  </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-white/10">
+                  <div class="text-xs text-white/50 mb-1">Valeur vie client annuelle générée</div>
+                  <div id="r-ltv" class="font-display text-xl font-medium text-white">
+                    + 2 520 € / an
+                  </div>
+                </div>
+              </div>
+
+              <!-- CTA -->
+              <a
+                href="/contact?offre=session-decouverte"
+                class="btn-accent w-full justify-center py-4 text-base"
+              >
+                Réserver ma session à 190 € HT
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+
+              <p class="text-xs text-center text-muted">
+                Résultat garanti ou recommencé sans frais. 190 € déduits d'un pack dans les 30 jours.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Hypothèses et méthodologie -->
+    <section class="section-pad-sm bg-surface">
+      <div class="container-site max-w-3xl">
+        <h2 class="font-display text-lg text-ink mb-4">Hypothèses du calculateur</h2>
+        <div class="flex flex-col gap-3 text-sm text-ink-2 leading-relaxed">
+          <p>
+            <strong class="text-ink">+42 % de conversion</strong> — issu d'une étude Google (2022) montrant que les établissements avec photos professionnelles reçoivent en moyenne 42 % de demandes d'itinéraires supplémentaires vs. ceux sans photos ou avec photos de mauvaise qualité.
+          </p>
+          <p>
+            <strong class="text-ink">Taux de conversion</strong> — le ratio "visiteurs profil Google" → "premier contact" varie fortement selon le secteur. Un taux de 2 % est conservateur et réaliste pour un commerce local avec peu de visibilité.
+          </p>
+          <p>
+            <strong class="text-ink">Valeur client</strong> — les calculs utilisent uniquement la valeur du premier contact, pas la valeur vie client complète (qui est souvent 3 à 10× supérieure).
+          </p>
+          <p class="text-xs text-muted">
+            Ce calculateur fournit des estimations indicatives. Les résultats réels varient selon le secteur, la zone géographique, la concurrence et la qualité de l'ensemble du profil client.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  function fmt(n: number) {
+    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n) + ' €';
+  }
+  function fmtN(n: number) {
+    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(n);
+  }
+
+  function calculate() {
+    const visiteurs = parseFloat((document.getElementById('visiteurs') as HTMLInputElement).value) || 0;
+    const tauxActuel = parseFloat((document.getElementById('taux-actuel') as HTMLInputElement).value) || 0;
+    const valeurClient = parseFloat((document.getElementById('valeur-client') as HTMLInputElement).value) || 0;
+    const retention = parseFloat((document.getElementById('retention') as HTMLInputElement).value) || 1;
+
+    const BOOST = 1.42;
+    const SESSION_PRICE = 190;
+
+    const clientsActuels = visiteurs * (tauxActuel / 100);
+    const clientsPro = clientsActuels * BOOST;
+    const caActuel = clientsActuels * valeurClient;
+    const caPro = clientsPro * valeurClient;
+    const gainMensuel = caPro - caActuel;
+    const gainAnnuel = gainMensuel * 12 * retention;
+
+    // ROI : combien de jours pour rentabiliser 190€ ?
+    const gainJournalier = gainMensuel / 30;
+    const joursRoi = gainJournalier > 0 ? Math.ceil(SESSION_PRICE / gainJournalier) : null;
+
+    // Mise à jour DOM
+    (document.getElementById('r-clients-actuels') as HTMLElement).textContent = fmtN(clientsActuels);
+    (document.getElementById('r-ca-actuel') as HTMLElement).textContent = fmt(caActuel);
+    (document.getElementById('r-clients-pro') as HTMLElement).textContent = fmtN(clientsPro);
+    (document.getElementById('r-ca-pro') as HTMLElement).textContent = fmt(caPro);
+    (document.getElementById('r-gain-mensuel') as HTMLElement).textContent = '+ ' + fmt(gainMensuel);
+    (document.getElementById('r-ltv') as HTMLElement).textContent = '+ ' + fmt(gainAnnuel) + ' / an';
+
+    const roiEl = document.getElementById('r-roi') as HTMLElement;
+    if (joursRoi !== null && joursRoi <= 365) {
+      roiEl.textContent = `rentabilisée en ${joursRoi} jour${joursRoi > 1 ? 's' : ''}`;
+    } else if (gainMensuel <= 0) {
+      roiEl.textContent = 'ajustez vos paramètres';
+    } else {
+      roiEl.textContent = 'rentabilisée en < 1 an';
+    }
+  }
+
+  function initCalculator() {
+    const inputs = ['visiteurs', 'taux-actuel', 'valeur-client', 'retention'];
+    inputs.forEach((id) => {
+      document.getElementById(id)?.addEventListener('input', calculate);
+    });
+    calculate();
+  }
+
+  document.addEventListener('astro:page-load', initCalculator);
+</script>
