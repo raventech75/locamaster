@@ -1,0 +1,240 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import CTAFinale from '../../sections/CTAFinale.astro';
+import { secteurs, getSecteurBySlug } from '../../data/secteurs';
+import { projets } from '../../data/projets';
+
+export function getStaticPaths() {
+  return secteurs.map((s) => ({
+    params: { slug: s.slug },
+    props: { secteur: s },
+  }));
+}
+
+const { secteur } = Astro.props;
+const projetsLies = secteur.projetsLies
+  ? projets.filter((p) => secteur.projetsLies!.includes(p.slug))
+  : [];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": `Photo et vidéo pour ${secteur.nomPluriel} — Locamaster`,
+  "description": secteur.metaDescription,
+  "provider": {
+    "@type": "LocalBusiness",
+    "@id": "https://www.locamaster.fr/#localbusiness",
+    "name": "Locamaster"
+  },
+  "areaServed": { "@type": "AdministrativeArea", "name": "Île-de-France" },
+  "serviceType": `Photographie et vidéo professionnelle pour ${secteur.nomPluriel}`,
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": secteur.faq.map((item) => ({
+    "@type": "Question",
+    "name": item.question,
+    "acceptedAnswer": { "@type": "Answer", "text": item.reponse },
+  })),
+};
+---
+
+<BaseLayout
+  title={secteur.titre}
+  description={secteur.metaDescription}
+  canonical={`/secteurs/${secteur.slug}`}
+  breadcrumbs={[
+    { name: "Secteurs", url: "/secteurs" },
+    { name: secteur.nomPluriel.charAt(0).toUpperCase() + secteur.nomPluriel.slice(1), url: `/secteurs/${secteur.slug}` }
+  ]}
+  schema={schema}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(faqSchema)} />
+  <Navigation variant="solid" />
+  <main id="main-content">
+
+    <!-- Hero section -->
+    <section class="section-pad-sm bg-surface">
+      <div class="container-site">
+        <div class="max-w-3xl">
+          <div class="flex items-center gap-3 mb-5">
+            <span class="accent-line" aria-hidden="true" />
+            <span class="section-label">Pour les {secteur.nomPluriel}</span>
+          </div>
+          <h1 class="font-display text-ink mb-5 leading-[1.0]">
+            {secteur.accroche}
+          </h1>
+          <p class="text-lead max-w-2xl mb-8">
+            {secteur.description}
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a href="/contact" class="btn-accent">
+              Demander un devis gratuit
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </a>
+            <a href="/offres" class="btn-secondary">Voir les tarifs</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problèmes courants -->
+    <section class="section-pad bg-ink text-bg" aria-labelledby="problemes-titre">
+      <div class="container-site">
+        <div class="max-w-2xl mb-10">
+          <span class="section-label text-bg/60 before:bg-accent">Le constat</span>
+          <h2 id="problemes-titre" class="font-display text-bg mt-4">
+            {`Ce que vivent la plupart des ${secteur.nomPluriel}.`}
+          </h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {secteur.problemes.map((probleme, i) => (
+            <div class="flex gap-4 p-6 rounded-xl border border-white/10 bg-white/5">
+              <span class="font-display text-accent text-2xl font-bold flex-shrink-0 leading-none">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <p class="text-sm text-bg/80 leading-relaxed">{probleme}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Solutions -->
+    <section class="section-pad bg-bg" aria-labelledby="solutions-titre">
+      <div class="container-site">
+        <div class="max-w-2xl mb-12">
+          <span class="section-label">Ce qu'on fait ensemble</span>
+          <h2 id="solutions-titre" class="font-display text-ink mt-4">
+            Des services pensés pour votre métier.
+          </h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {secteur.solutions.map((sol) => (
+            <div class="card card-hover p-7">
+              <div class="w-10 h-10 bg-accent-soft rounded-lg flex items-center justify-center mb-5">
+                <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 class="font-display text-lg font-medium text-ink mb-3">{sol.titre}</h3>
+              <p class="text-sm text-ink-2 leading-relaxed">{sol.texte}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Offre d'entrée -->
+    <section class="section-pad-sm bg-surface" aria-label="Offre d'entrée">
+      <div class="container-site max-w-3xl">
+        <div class="card p-8 md:p-10 border-2 border-ink">
+          <div class="flex items-start justify-between gap-6 flex-wrap">
+            <div class="flex-1">
+              <span class="badge mb-4">Commencer sans risque</span>
+              <h2 class="font-display text-2xl font-medium text-ink mb-3">
+                Session Découverte — 190 € HT
+              </h2>
+              <p class="text-ink-2 text-sm leading-relaxed mb-5">
+                45 à 60 minutes sur votre lieu de travail. 5 photos premium retouchées
+                livrées en 5 jours + 1 vidéo courte prête à publier.
+                Résultat garanti ou recommencé sans frais.
+              </p>
+              <ul class="flex flex-col gap-2 text-sm text-ink-2">
+                {[
+                  'Livraison en 5 jours ouvrés',
+                  'Résultat garanti ou refait sans frais',
+                  "Les 190 € déduits d'un pack si vous continuez (30 jours)",
+                ].map((item) => (
+                  <li class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div class="flex-shrink-0">
+              <a href={`/contact?offre=session-decouverte&secteur=${secteur.slug}`} class="btn-primary text-base px-8 py-4">
+                Réserver ma session
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projets liés -->
+    {projetsLies.length > 0 && (
+      <section class="section-pad-sm bg-bg" aria-labelledby="realisations-titre">
+        <div class="container-site">
+          <div class="max-w-2xl mb-10">
+            <span class="section-label">Réalisations</span>
+            <h2 id="realisations-titre" class="font-display text-ink mt-4">
+              Un exemple concret.
+            </h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+            {projetsLies.map((projet) => (
+              <a
+                href={`/realisations/${projet.slug}`}
+                class="group block rounded-xl overflow-hidden border border-border hover:border-ink transition-all duration-300 hover:shadow-md"
+              >
+                <div class="aspect-[16/9] overflow-hidden bg-surface">
+                  <img
+                    src={projet.imageCover}
+                    alt={projet.titre}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                    width="640"
+                    height="360"
+                  />
+                </div>
+                <div class="p-5">
+                  <p class="text-xs text-muted font-medium uppercase tracking-wider mb-1">{projet.secteur}</p>
+                  <h3 class="font-display text-base font-medium text-ink">{projet.titre}</h3>
+                </div>
+              </a>
+            ))}
+          </div>
+          <div class="mt-8">
+            <a href="/realisations" class="btn-secondary inline-flex">Voir tout le portfolio</a>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- FAQ -->
+    {secteur.faq.length > 0 && (
+      <section class="section-pad-sm bg-surface" aria-labelledby="faq-secteur-titre">
+        <div class="container-site max-w-2xl">
+          <span class="section-label">Questions fréquentes</span>
+          <h2 id="faq-secteur-titre" class="font-display text-ink mt-4 mb-8">
+            Questions spécifiques aux {secteur.nomPluriel}.
+          </h2>
+          <div class="flex flex-col gap-4">
+            {secteur.faq.map((item) => (
+              <div class="bg-white rounded-xl border border-border p-6">
+                <h3 class="font-sans font-medium text-sm text-ink mb-3">{item.question}</h3>
+                <p class="text-sm text-ink-2 leading-relaxed">{item.reponse}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <CTAFinale />
+  </main>
+  <Footer />
+</BaseLayout>

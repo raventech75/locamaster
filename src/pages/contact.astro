@@ -320,7 +320,7 @@ const schema = {
         form.reset();
         successMsg?.classList.remove('hidden');
         errorMsg?.classList.add('hidden');
-        // Scroll vers le message de succès
+        document.dispatchEvent(new CustomEvent('contact:success'));
         successMsg?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
         throw new Error('Erreur serveur');
